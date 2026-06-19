@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "rolllux"
+version = "4.0.0"
+name = "RollLux"
+tagline = "Match scene lighting to a reference image — presets, LuxPro direction, live tuning & viewport overlay"
+maintainer = "ACGGIT"
+type = "add-on"
+
+tags = ["Lighting", "Render", "Animation"]
+
+blender_version_min = "5.0.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+# Pure-python, zero external dependencies. Uses bpy + the numpy that ships
+# inside Blender, so it works fully offline with no install step.
