@@ -10,6 +10,7 @@
 
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-2ea043)](LICENSE)
 [![Blender](https://img.shields.io/badge/Blender-5.0%2B-f5792a?logo=blender&logoColor=white)](https://www.blender.org/)
+[![Release](https://img.shields.io/github/v/release/AIGODLIKE/RollLux?label=RollLux)](https://github.com/AIGODLIKE/RollLux/releases/latest)
 [![Python](https://img.shields.io/badge/python-pure%20%2B%20numpy-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![Offline](https://img.shields.io/badge/网络-完全离线-success)]()
 
@@ -51,7 +52,8 @@
 | 🎨 **双色 gel 光** | 蓝 + 洋红等饱和双色各自独立 **Accent** SPOT |
 | ⚡ **硬光 / 分割光** | 识别清晰明暗交界 → SPOT 主光、弱补光、自动对比 / 阴影参数 |
 | 🎛️ **实时调参** | 强度、曝光、距离、旋转、饱和度、阴影、高光、对比度 |
-| 📸 **自动曝光** | 四种测光模式 + EV 补偿；可匹配参考图平均亮度 |
+| 📸 **自动曝光** | Rendered 视口采样；TRIM / LOG / P60 测光、EV 补偿、快速收敛、LIGHT_RIG 烘焙 |
+| 🧩 **Quick / Pro 界面** | Quick 精简工作流，或 Pro 完整面板（高级 AE、rig、单灯控制） |
 | 🎲 **程序生成预设** | 策略缩略图与分布参考图 **代码合成**，随机一次即出新样式 |
 | 🗂️ **策略选择** | 命名起点 + **随机** · 程序生成的着色球预览 · 步进切换 |
 | 🖼️ **分布参考库** | 内置参考图 **程序合成**（渐变、光斑、轮廓、暗角等） |
@@ -119,7 +121,7 @@
 
 ### 安装
 
-1. 获取 **`rolllux-4.0.0.zip`** 扩展包。
+1. 从 [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) 下载 **`rolllux-5.0.0.zip`**。
 2. Blender → **编辑 → 偏好设置 → 获取扩展 → ▼ → 从磁盘安装…**
 3. 选择 zip → 启用 **RollLux**。
 

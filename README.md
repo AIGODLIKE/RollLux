@@ -10,6 +10,7 @@
 
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-2ea043)](LICENSE)
 [![Blender](https://img.shields.io/badge/Blender-5.0%2B-f5792a?logo=blender&logoColor=white)](https://www.blender.org/)
+[![Release](https://img.shields.io/github/v/release/AIGODLIKE/RollLux?label=RollLux)](https://github.com/AIGODLIKE/RollLux/releases/latest)
 [![Python](https://img.shields.io/badge/python-pure%20%2B%20numpy-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![Offline](https://img.shields.io/badge/network-offline%20ready-success)]()
 
@@ -52,7 +53,8 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 | 🎨 **Dual-tone gel lights** | Blue + red/magenta (and similar) each get their own **accent** SPOT |
 | ⚡ **Split & hard light** | Sharp terminators → SPOT key, minimal fill, auto contrast / shadow seeding |
 | 🎛️ **Live tuning** | Intensity, exposure, distance, rotation, saturation, shadows, highlights, contrast |
-| 📸 **Auto exposure** | Four metering modes + EV bias; optional reference luminance match |
+| 📸 **Auto exposure** | Viewport sampling in Rendered mode; TRIM / LOG / P60 metering, EV bias, fast converge, LIGHT_RIG bake |
+| 🧩 **Quick / Pro UI** | Compact Quick workflow or full Pro panel with advanced AE, rig, and per-light controls |
 | 🎲 **Procedural presets** | Strategy thumbnails & distribution refs **generated in code** — random roll yields new looks every time |
 | 🗂️ **Strategy picker** | Named starting styles + **Random** · procedural shaded-sphere previews · step navigation |
 | 🖼️ **Distribution library** | Built-in reference images **procedurally synthesized** (gradients, blobs, rim, vignette…) |
@@ -120,7 +122,7 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 
 ### Install
 
-1. Obtain **`rolllux-4.0.0.zip`** (extension package).
+1. Download **`rolllux-5.0.0.zip`** from [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest).
 2. Blender → **Edit → Preferences → Get Extensions → ▼ → Install from Disk…**
 3. Select the zip → enable **RollLux**.
 

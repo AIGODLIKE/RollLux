@@ -14,7 +14,7 @@ bl_info = {
     "name": "RollLux",
     "description": "Roll random lighting from reference images with one click.",
     "author": "ACGGIT",
-    "version": (4, 3, 13),
+    "version": (5, 0, 0),
     "blender": (5, 0, 0),
     "location": "Tool Panel",
     "support": "COMMUNITY",

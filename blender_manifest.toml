@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "rolllux"
-version = "4.3.13"
+version = "5.0.0"
 name = "RollLux"
 tagline = "Match scene lighting to a reference image — presets, LuxPro direction, live tuning & viewport overlay"
 maintainer = "ACGGIT"

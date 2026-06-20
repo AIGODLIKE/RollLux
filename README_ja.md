@@ -10,6 +10,7 @@
 
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-2ea043)](LICENSE)
 [![Blender](https://img.shields.io/badge/Blender-5.0%2B-f5792a?logo=blender&logoColor=white)](https://www.blender.org/)
+[![Release](https://img.shields.io/github/v/release/AIGODLIKE/RollLux?label=RollLux)](https://github.com/AIGODLIKE/RollLux/releases/latest)
 [![Python](https://img.shields.io/badge/python-pure%20%2B%20numpy-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![Offline](https://img.shields.io/badge/network-offline%20ready-success)]()
 
@@ -51,7 +52,8 @@
 | 🎨 **デュアルトーン gel** | 青 + マゼンタなど、飽和した 2 色を **アクセント** SPOT として分離 |
 | ⚡ **スプリット / ハード光** | シャープな明暗境界 → SPOT キー、弱フィル、コントラスト自動シード |
 | 🎛️ **ライブ調整** | 強度、露出、距離、回転、彩度、シャドウ、ハイライト、コントラスト |
-| 📸 **自動露出** | 4 つの測光モード + EV 補正・参照図の平均輝度に合わせ可能 |
+| 📸 **自動露出** | Rendered ビューポートサンプリング；TRIM / LOG / P60 測光、EV 補正、高速収束、LIGHT_RIG ベイク |
+| 🧩 **Quick / Pro UI** | Quick コンパクトワークフロー、または Pro フルパネル（高度 AE、rig、個別ライト） |
 | 🎲 **手続き型プリセット** | ストラテジーサムネ & 分布参照を **コード生成** — ランダムで毎回新しいルック |
 | 🗂️ **ストラテジー** | 名前付き起点 + **ランダム** · 手続き型シェーディング球プレビュー · ステップ移動 |
 | 🖼️ **分布ライブラリ** | 内蔵参照画像を **手続き合成**（グラデ・光斑・リム・ビネット等） |
@@ -119,7 +121,7 @@
 
 ### インストール
 
-1. **`rolllux-4.0.0.zip`** 拡張パッケージを入手。
+1. [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) から **`rolllux-5.0.0.zip`** をダウンロード。
 2. Blender → **編集 → プリファレンス → 拡張機能を取得 → ▼ → ディスクからインストール…**
 3. zip を選択 → **RollLux** を有効化。
 
