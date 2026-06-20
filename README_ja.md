@@ -4,7 +4,7 @@
 
 **参照画像から Blender のライティングをワンクリックで再現**
 
-*手続き型プリセット · LuxPro 方向 · デュアルトーン gel · ライブ調整 · ビューポートオーバーレイ*
+*手続き型プリセット · LuxPro 方向 · ビューポート自動露出 · ライブ調整 · オーバーレイ*
 
 <br>
 
@@ -74,6 +74,7 @@
 | ランダム生成 | ❌ | ✅ |
 | プリセット & 参照の手続き生成 | ❌ | ✅ |
 | スライダーライブ更新 | — | ✅ |
+| ビューポート自動露出 | ❌ | ✅ |
 | 完全オフライン | ✅ | ✅ |
 
 </details>
@@ -144,7 +145,110 @@ py build.py         # 出力 -> ../dist/rolllux-<version>.zip
 4. 任意：**照明分布**（手続きライブラリ）を変更、または独自の写真を使用。
 5. 被写体を選択 → **Generate Lighting**。
 6. **Intensity**、**Contrast**、**Shadows**、**Highlights**、**Saturation** を調整 — ライブ反映。
-7. **Advanced** で rig 設定、ライト一覧、LuxPro、分析スウォッチ。
+7. 3D ビューを **Rendered** シェーディングに切り替え、**Auto Exposure** をオン（デフォルト ON）— [自動露出](#-自動露出) を参照。
+8. パネル上部の **UI Mode** で **Quick**（コンパクト）と **Pro**（AE・rig 全機能）を切替。
+
+---
+
+## 📸 自動露出
+
+RollLux **5.0** のビューポート自動露出（AE）は、3D ビューのピクセルを直接サンプリングし、シーン輝度を目標値付近に保ちます。ディスクへのレンダーや外部ツールは不要です。
+
+### 動作の流れ
+
+1. AE オン中、タイマーでビューポートフレームバッファを読み取り（**Material** または **Rendered** シェーディングが必要。**Rendered** 推奨）。
+2. 測光領域で **10×10 サンプルグリッド** を収集。**中心重み** と任意の **グリッドジッター** でモアレ誤読を低減。
+3. 輝度に変換し、選択した **測光モード** で集約。
+4. 目標との EV 差を **カラーマネジメント露出** または **ライトリグエネルギー**（`Intensity × 2^EV`）に反映。
+5. **Apply（✓）** で現在の AE オフセットを **ベイク** し、AE をオフ。
+
+> **ヒント:** ビューポートが Rendered でない場合は手動で切り替えるか、パネルの **Set Rendered** を使用してください。
+
+### Quick と Pro UI
+
+| | **Quick** | **Pro** |
+|:--|:--|:--|
+| AE 操作 | カメラアイコン + **EV Bias** + **Apply** | 露出行に **AE Mode** も表示 |
+| 高度 AE | 非表示 | **Auto Exposure** ボックス全項目：適用先、サンプリング、速度、gamma、ジッター、高速収束、ライブ EV |
+
+パネル上部 **UI Mode** で Quick / Pro を切替。
+
+### 測光モード
+
+| モード | 向いている用途 |
+|:--|:--|
+| **Average** | 汎用；サンプル領域の平均輝度 |
+| **Median** | ノイズ・高コントラスト；外れ値に強い |
+| **60th Percentile (P60)** | 中央値よりやや明るめ — ポートレート向け |
+| **Trim Mean** | 上下 10% を除外して平均 — 背景が混在するシーン |
+| **Log Average** | HDR 寄りの混合；対数域の幾何平均 |
+| **Highlight** | ハイライト保護；85 パーセンタイル付近 |
+| **Reference** | 目標 = **参照画像** の平均輝度（未取得時は 18% グレー） |
+
+全モードで **Center Weight（0–100%）** により全画面と中心サンプルをブレンド。
+
+### 露出の適用先
+
+| **Apply to** | 動作 |
+|:--|:--|
+| **Color Management** | `scene.view_settings.exposure` をライブ更新。AE 中は **Parameter Correction（gamma）** も可。**Apply** で CM にベイクして AE オフ。 |
+| **Light Rig** | `ae_value` を更新し **Intensity** 経由で全ライトをスケール（`× 2^EV`）。AE 中は **Exposure** スライダー固定。**Apply** で EV を **Intensity** に乗算して AE オフ。 |
+
+**Light Rig** モードは Cycles 向けに輝度 **安定待ち**、適応 **レート制限**、エンジンノイズに応じた待機時間でフリッカーを抑制。
+
+### サンプリング領域プリセット
+
+| プリセット | 説明 |
+|:--|:--|
+| **Full Frame** | ビューポート全体を等重み |
+| **Balanced** | 中心 70% 重み（デフォルト） |
+| **Center** | 中心グリッドのみ測光 |
+| **Subject Frame** | カメラビューはカメラ枠、自由ビューは中心 60% |
+| **Custom** | **Center Weight** スライダー手動 |
+
+カメラビューでは **Subject Frame** 以外でも **カメラ枠** 内に自動クロップして測光。
+
+### コントロール（Pro パネル）
+
+| 項目 | 用途 |
+|:--|:--|
+| **EV Bias** | 計算目標に加算する露出補正（ストップ） |
+| **AE Speed** | EV が目標へ近づく速度（Light Rig は上限を自動調整） |
+| **Parameter Correction** | CM 駆動時の gamma 微調整 |
+| **Jitter** | フレームごとにグリッド回転 — モアレ低減 |
+| **Fast Converge** | 残差または次 EV ステップが **0.1** ストップ未満で停止 |
+| **ライブ表示** | 実行中の CM 露出または Light Rig EV |
+| **Apply（✓）** | AE を CM 露出または **Intensity** にベイクして AE オフ |
+
+### おすすめワークフロー
+
+<details>
+<summary><b>ポートレート / プロダクト（CM 経路）</b></summary>
+
+1. ライト生成 → ビューを **Rendered** に。
+2. **Apply to**: Color Management · Mode: **P60** または **Trim Mean** · Sampling: **Balanced**。
+3. **EV Bias** で顔の明るさを微調整。
+4. 問題なければ **Apply** で露出をベイク。
+
+</details>
+
+<details>
+<summary><b>ライトを反復調整（Light Rig 経路）</b></summary>
+
+1. **Apply to**: Light Rig · **Fast Converge** をオン。
+2. 色や rig スライダーを触りながら AE が全体輝度を維持。
+3. 完了後 **Apply** で EV を **Intensity** に取り込み、手動調整へ。
+
+</details>
+
+<details>
+<summary><b>参照画像の明るさに合わせる</b></summary>
+
+1. 参照読込 → **Analyze**（または **Generate**）。
+2. AE Mode: **Reference** — 目標輝度は参照解析から。
+3. **EV Bias** で仕上げ。
+
+</details>
 
 ---
 
@@ -160,6 +264,7 @@ py build.py         # 出力 -> ../dist/rolllux-<version>.zip
 | 照明分布 | **手続き生成**参照画像 + **ランダム** |
 | Generate / Analyze / Clear | rig 構築 · 解析のみ · 削除 |
 | 調整スライダー | 強度、露出、AE、距離、回転、高さ、色、トーン |
+| UI Mode | **Quick** コンパクトまたは **Pro** 全 AE ブロック |
 | Auto Generate | タイマー再生成 |
 
 </details>
@@ -175,6 +280,7 @@ py build.py         # 出力 -> ../dist/rolllux-<version>.zip
 | LuxPro | 方向検出 |
 | Lights | 個別色、エネルギー、削除 |
 | Analysis | サンプル色、LuxPro ラベル、ムード、K |
+| Auto Exposure | 適用先、測光、サンプリング、速度、ベイク — [自動露出](#-自動露出) 参照 |
 
 </details>
 

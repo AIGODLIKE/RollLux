@@ -4,7 +4,7 @@
 
 **Match your Blender scene lighting to any reference image — in one click.**
 
-*Procedural presets · LuxPro direction · dual-tone gel lights · live tuning · viewport overlay*
+*Procedural presets · LuxPro direction · viewport auto exposure · live tuning · viewport overlay*
 
 <br>
 
@@ -75,6 +75,7 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 | Random roll | ❌ | ✅ |
 | Procedural preset & ref generation | ❌ | ✅ |
 | Live slider updates | — | ✅ |
+| Viewport auto exposure | ❌ | ✅ |
 | Fully offline | ✅ | ✅ |
 
 </details>
@@ -145,7 +146,110 @@ py build.py         # -> ../dist/rolllux-<version>.zip
 4. Optionally change **Lighting Distribution** (procedural library) or use your own photo.
 5. Select your subject → **Generate Lighting**.
 6. Tune **Intensity**, **Contrast**, **Shadows**, **Highlights**, **Saturation** — updates apply live.
-7. Expand **Advanced** for rig setup, per-light list, LuxPro direction, and analysis swatches.
+7. Switch the 3D View to **Rendered** shading and enable **Auto Exposure** (on by default) — see [Auto Exposure](#-auto-exposure) below.
+8. Use **Quick** for a compact panel, or **Pro** for full AE and rig controls.
+
+---
+
+## 📸 Auto Exposure
+
+RollLux **5.0** ships a viewport-based auto exposure (AE) system that reads live pixels from the 3D View and keeps your scene at a stable luminance target — without leaving Blender or rendering to disk.
+
+### How it works
+
+1. While AE is on, RollLux samples the viewport framebuffer on a timer (requires **Material** or **Rendered** shading; **Rendered** is preferred).
+2. A **10×10 sample grid** is collected over the metering region, with optional **center weighting** and per-frame **grid jitter** to reduce moiré misreads.
+3. Samples are converted to luminance and aggregated with your chosen **metering mode**.
+4. The plugin computes the EV gap to the target and applies it either to **Color Management exposure** or **light rig energy** (via `intensity × 2^EV`).
+5. Tap **Apply** (✓) to **bake** the current AE offset into permanent settings and turn AE off.
+
+> **Tip:** If the viewport is not in Rendered mode, use the panel’s **Set Rendered** control or switch shading manually before expecting AE to react.
+
+### Quick vs Pro UI
+
+| | **Quick** | **Pro** |
+|:--|:--|:--|
+| AE toggle | Camera icon + **EV Bias** + **Apply** | Same in the exposure row, plus **AE Mode** |
+| Advanced AE | Hidden | Full **Auto Exposure** box: apply target, sampling, speed, gamma, jitter, fast converge, live EV readout |
+
+Switch **UI Mode** at the top of the panel between Quick and Pro.
+
+### Metering modes
+
+| Mode | Best for |
+|:--|:--|
+| **Average** | General-purpose; mean luminance of the sample region |
+| **Median** | Noisy or high-contrast scenes; resists outliers |
+| **60th Percentile (P60)** | Slightly brighter than median — good for portraits |
+| **Trim Mean** | Drops top/bottom 10% before averaging — robust for mixed backgrounds |
+| **Log Average** | HDR-ish mixes; geometric mean in log space |
+| **Highlight** | Protect highlights; meters toward the 85th percentile |
+| **Reference** | Target = mean luminance of your **reference image** (falls back to 18% grey if unavailable) |
+
+All modes blend **full-frame** and **center** samples according to **Center Weight** (0–100%).
+
+### Where exposure is applied
+
+| **Apply to** | Behavior |
+|:--|:--|
+| **Color Management** | Writes `scene.view_settings.exposure` live; optional **Parameter Correction (gamma)** while AE is active. **Apply** bakes exposure into CM and disables AE. |
+| **Light Rig** | Adjusts `ae_value` and scales all light energy through **Intensity** (`× 2^EV`). Manual **Exposure** slider is locked while active. **Apply** multiplies **Intensity** by the accumulated EV and disables AE. |
+
+**Light Rig** mode includes Cycles-aware safeguards: luminance must **settle** between steps, adaptation is **rate-limited**, and timing scales with render engine noise — reducing flicker when Cycles is still converging.
+
+### Sampling region presets
+
+| Preset | Description |
+|:--|:--|
+| **Full Frame** | Entire viewport weighted equally |
+| **Balanced** | 70% center weight (default) |
+| **Center** | Meters only the dense center grid |
+| **Subject Frame** | Camera border in camera view, or center 60% in free view |
+| **Custom** | Manual **Center Weight** slider |
+
+In camera view without **Subject Frame**, the plugin can also crop to the **camera frame** automatically.
+
+### Controls (Pro panel)
+
+| Control | Purpose |
+|:--|:--|
+| **EV Bias** | Exposure compensation in stops added on top of the computed target |
+| **AE Speed** | How quickly EV moves toward the target (Light Rig mode caps speed adaptively) |
+| **Parameter Correction** | CM gamma tweak while AE drives Color Management |
+| **Jitter** | Rotate the sample grid each frame to reduce moiré misreads |
+| **Fast Converge** | Stop when remaining error or the next EV step is below **0.1** stops |
+| **Live readout** | Current CM exposure or Light Rig EV while AE is running |
+| **Apply (✓)** | Bake AE → CM exposure or **Intensity**, then turn AE off |
+
+### Recommended workflows
+
+<details>
+<summary><b>Portrait / product (CM path)</b></summary>
+
+1. Generate lighting → switch viewport to **Rendered**.
+2. AE **Apply to**: **Color Management** · Mode: **P60** or **Trim Mean** · Sampling: **Balanced**.
+3. Set **EV Bias** if the face should sit slightly brighter or darker.
+4. When happy, click **Apply** to bake exposure into the scene.
+
+</details>
+
+<details>
+<summary><b>Iterative light tuning (Light Rig path)</b></summary>
+
+1. AE **Apply to**: **Light Rig** · enable **Fast Converge** for quicker settling.
+2. Tweak colors and rig sliders while AE keeps overall brightness stable.
+3. **Apply** when done to fold EV into **Intensity** and continue manual tuning.
+
+</details>
+
+<details>
+<summary><b>Match reference brightness</b></summary>
+
+1. Load reference → **Analyze** (or **Generate**).
+2. AE Mode: **Reference** — target luminance comes from the reference image analysis.
+3. Use **EV Bias** for fine matching.
+
+</details>
 
 ---
 
@@ -161,6 +265,7 @@ py build.py         # -> ../dist/rolllux-<version>.zip
 | Lighting Distribution | **Procedurally generated** reference images + **Random** |
 | Generate / Analyze / Clear | Build rig · analyze only · remove rig |
 | Tuning sliders | Intensity, exposure, AE, distance, rotation, height, colors, tone |
+| UI Mode | **Quick** compact layout or **Pro** with full Auto Exposure block |
 | Auto Generate | Timer-based re-roll (interval slider) |
 
 </details>
@@ -176,6 +281,7 @@ py build.py         # -> ../dist/rolllux-<version>.zip
 | LuxPro | Enable direction detection |
 | Lights list | Per-light color, energy, delete |
 | Analysis | Sampled colors, LuxPro label, mood, Kelvin |
+| Auto Exposure | Apply target, metering mode, sampling preset, speed, bake — see [Auto Exposure](#-auto-exposure) |
 
 </details>
 
