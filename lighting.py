@@ -260,7 +260,10 @@ def _exposure_factor(exp: int) -> float:
 
 
 def _energy_scale(settings) -> float:
-    return float(settings.intensity) * _exposure_factor(int(settings.exposure)) * 3.0
+    scale = float(settings.intensity) * _exposure_factor(int(settings.exposure)) * 3.0
+    if settings.auto_exposure and getattr(settings, "ae_apply_to", "COLOR_MANAGEMENT") == "LIGHT_RIG":
+        scale *= 2.0 ** float(settings.ae_value)
+    return scale
 
 
 def _apply_light(obj, settings, target, radius, basis):
@@ -507,22 +510,43 @@ def _profile_from_settings(context):
     return profile, None
 
 
+_REGEN_PENDING: set[str] = set()
+_RIG_BUSY = False
+
+
+def rig_busy() -> bool:
+    return _RIG_BUSY
+
+
 def analyze_only(context):
-    return _profile_from_settings(context)
+    global _RIG_BUSY
+    if _RIG_BUSY:
+        schedule_analyze_only(context)
+        return None, "busy"
+    _RIG_BUSY = True
+    try:
+        return _profile_from_settings(context)
+    finally:
+        _RIG_BUSY = False
 
 
 def analyze_and_generate(context):
-    profile, err = _profile_from_settings(context)
-    if err:
-        return None, err
-    s = context.scene.rolllux
-    specs = presets.apply_preset(profile, s.lighting_preset, s.mode)
-    specs = presets.fit_to_count(specs, s.light_count, profile, s.color_strategy)
-    summary = generate(context, profile, s, specs=specs)
-    return summary, None
-
-
-_REGEN_PENDING: set[str] = set()
+    global _RIG_BUSY
+    if _RIG_BUSY:
+        schedule_analyze_and_generate(context)
+        return None, "busy"
+    _RIG_BUSY = True
+    try:
+        profile, err = _profile_from_settings(context)
+        if err:
+            return None, err
+        s = context.scene.rolllux
+        specs = presets.apply_preset(profile, s.lighting_preset, s.mode)
+        specs = presets.fit_to_count(specs, s.light_count, profile, s.color_strategy)
+        summary = generate(context, profile, s, specs=specs)
+        return summary, None
+    finally:
+        _RIG_BUSY = False
 
 
 def schedule_analyze_and_generate(context):
@@ -544,6 +568,9 @@ def schedule_analyze_and_generate(context):
                 return None
             if ctx.scene.rolllux.reference_image is None:
                 return None
+            if _RIG_BUSY:
+                schedule_analyze_and_generate(ctx)
+                return None
             analyze_and_generate(ctx)
         except Exception:
             pass
@@ -552,7 +579,10 @@ def schedule_analyze_and_generate(context):
     if getattr(bpy.app, "background", False):
         _REGEN_PENDING.discard(name)
         try:
-            analyze_and_generate(context)
+            if not _RIG_BUSY:
+                analyze_and_generate(context)
+            else:
+                schedule_analyze_and_generate(context)
         except Exception:
             pass
         return
@@ -579,6 +609,9 @@ def schedule_analyze_only(context):
                 return None
             if ctx.scene.rolllux.reference_image is None:
                 return None
+            if _RIG_BUSY:
+                schedule_analyze_only(ctx)
+                return None
             analyze_only(ctx)
         except Exception:
             pass
@@ -587,7 +620,10 @@ def schedule_analyze_only(context):
     if getattr(bpy.app, "background", False):
         _REGEN_PENDING.discard(name)
         try:
-            analyze_only(context)
+            if not _RIG_BUSY:
+                analyze_only(context)
+            else:
+                schedule_analyze_only(context)
         except Exception:
             pass
         return

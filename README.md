@@ -52,7 +52,7 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 | 🎨 **Dual-tone gel lights** | Blue + red/magenta (and similar) each get their own **accent** SPOT |
 | ⚡ **Split & hard light** | Sharp terminators → SPOT key, minimal fill, auto contrast / shadow seeding |
 | 🎛️ **Live tuning** | Intensity, exposure, distance, rotation, saturation, shadows, highlights, contrast |
-| 📸 **Auto exposure** | Viewport AE in Rendered/Material shading (optional) |
+| 📸 **Auto exposure** | Four metering modes + EV bias; optional reference luminance match |
 | 🎲 **Procedural presets** | Strategy thumbnails & distribution refs **generated in code** — random roll yields new looks every time |
 | 🗂️ **Strategy picker** | Named starting styles + **Random** · procedural shaded-sphere previews · step navigation |
 | 🖼️ **Distribution library** | Built-in reference images **procedurally synthesized** (gradients, blobs, rim, vignette…) |

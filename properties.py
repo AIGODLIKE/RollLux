@@ -19,6 +19,8 @@ from bpy.types import PropertyGroup
 
 from . import translations, presets, overlay, auto_exposure
 
+_d = translations.rna_desc
+
 # Guards to keep update callbacks from recursing / fighting each other.
 _SUSPEND = False        # while a preset seeds the sliders before a rebuild
 _LANG_SYNCING = False   # while we auto-sync language from Blender prefs
@@ -38,9 +40,40 @@ def _on_ae_gamma(self, context):
         return
     if not self.auto_exposure:
         return
+    if getattr(self, "ae_apply_to", "COLOR_MANAGEMENT") != "COLOR_MANAGEMENT":
+        return
     scene = getattr(context or bpy.context, "scene", None)
     if scene is not None:
         scene.view_settings.gamma = float(self.ae_gamma)
+
+
+_AE_CENTER_PRESETS = {
+    "FULL": (0, False),
+    "BALANCED": (70, False),
+    "CENTER": (100, False),
+    "FRAME": (100, True),
+}
+
+
+def _on_ae_center_preset(self, context):
+    global _SUSPEND
+    if _SUSPEND:
+        return
+    if self.ae_center_preset == "CUSTOM":
+        return
+    weight, frame_only = _AE_CENTER_PRESETS[self.ae_center_preset]
+    _SUSPEND = True
+    try:
+        self.ae_center_weight = weight
+        self.ae_frame_only = frame_only
+    finally:
+        _SUSPEND = False
+
+
+def _on_ae_center_weight(self, context):
+    if _SUSPEND:
+        return
+    self.ae_center_preset = "CUSTOM"
 
 
 def _live(self, context):
@@ -82,7 +115,7 @@ def _on_language(self, context):
     global _LANG_SYNCING
     if not _LANG_SYNCING:
         self.lang_user_set = True
-    translations.sync_descriptions(self.language)
+    translations.sync_i18n(self.language)
 
 
 def _on_reference_image(self, context):
@@ -284,6 +317,11 @@ class RLLM_AnalysisResult(PropertyGroup):
 
 
 class RLLM_Settings(PropertyGroup):
+    ui_mode: EnumProperty(
+        name="UI Mode", description=_d("ui_mode"),
+        items=translations.ui_mode_items,
+        default=0,
+    )
     language: EnumProperty(
         name="Language", description="",
         items=translations.LANGUAGES, default="EN", update=_on_language,
@@ -294,7 +332,7 @@ class RLLM_Settings(PropertyGroup):
 
     reference_image: PointerProperty(
         name="Reference", type=bpy.types.Image,
-        description="Lighting reference image to match",
+        description=_d("reference_image"),
         update=_on_reference_image,
     )
 
@@ -318,12 +356,12 @@ class RLLM_Settings(PropertyGroup):
 
     use_luxpro: BoolProperty(
         name="LuxPro", default=True,
-        description="Use LuxPro to detect the reference lighting direction",
+        description=_d("use_luxpro"),
     )
 
     light_count: IntProperty(
         name="Light Count", default=3, min=1, max=8,
-        description="How many lights to generate (key is always kept)",
+        description=_d("light_count"),
         update=_on_rebuild,
     )
 
@@ -338,119 +376,150 @@ class RLLM_Settings(PropertyGroup):
 
     lock_intensity: BoolProperty(
         name="Lock Intensity", default=False,
-        description="Keep intensity when switching Strategy presets",
+        description=_d("lock_intensity"),
     )
     lock_exposure: BoolProperty(
         name="Lock Exposure", default=False,
-        description="Keep exposure scale when switching Strategy presets",
+        description=_d("lock_exposure"),
     )
     lock_distance: BoolProperty(
         name="Lock Distance", default=False,
-        description="Keep distance when switching Strategy presets",
+        description=_d("lock_distance"),
     )
     lock_rig_rotation: BoolProperty(
         name="Lock Rotation", default=False,
-        description="Keep rig rotation when switching Strategy presets",
+        description=_d("lock_rig_rotation"),
     )
     lock_rig_height: BoolProperty(
         name="Lock Height", default=False,
-        description="Keep rig height when switching Strategy presets",
+        description=_d("lock_rig_height"),
     )
     lock_color_strength: BoolProperty(
         name="Lock Color Strength", default=False,
-        description="Keep color strength when switching Strategy presets",
+        description=_d("lock_color_strength"),
     )
     lock_color_saturation: BoolProperty(
         name="Lock Saturation", default=False,
-        description="Keep saturation when switching Strategy presets",
+        description=_d("lock_color_saturation"),
     )
     lock_tone_shadows: BoolProperty(
         name="Lock Shadows", default=False,
-        description="Keep shadow tone when switching Strategy presets",
+        description=_d("lock_tone_shadows"),
     )
     lock_tone_highlights: BoolProperty(
         name="Lock Highlights", default=False,
-        description="Keep highlight tone when switching Strategy presets",
+        description=_d("lock_tone_highlights"),
     )
     lock_contrast_boost: BoolProperty(
         name="Lock Contrast", default=False,
-        description="Keep contrast when switching Strategy presets",
+        description=_d("lock_contrast_boost"),
     )
 
     intensity: FloatProperty(name="Intensity", default=0.2, min=0.0, max=20.0,
                              soft_max=5.0, update=_live,
-                             description="Master multiplier on all light energy")
+                             description=_d("intensity"))
     exposure: IntProperty(
         name="Exposure", default=1, min=-20, max=20,
         update=_live,
-        description="Integer exposure scale (1 = neutral, negative = darker, >1 = brighter)",
+        description=_d("exposure"),
     )
     auto_exposure: BoolProperty(
-        name="Auto Exposure", default=False,
+        name="Auto Exposure", default=True,
         update=_on_auto_exposure,
-        description="Viewport auto exposure (Rendered shading, 18% grey target)",
+        description=_d("auto_exposure"),
+    )
+    ae_mode: EnumProperty(
+        name="AE Mode", description="",
+        items=translations.ae_mode_items,
+        default=0,
+    )
+    ae_apply_to: EnumProperty(
+        name="Apply To", description="",
+        items=translations.ae_apply_to_items,
+        default=1,
+    )
+    ae_center_preset: EnumProperty(
+        name="Sampling", description="",
+        items=translations.ae_center_preset_items,
+        default=1,
+        update=_on_ae_center_preset,
+    )
+    ae_ev_bias: FloatProperty(
+        name="EV Bias", default=0.0, min=-3.0, max=3.0, soft_min=-2.0, soft_max=2.0,
+        description=_d("ae_ev_bias"),
     )
     ae_speed: FloatProperty(
         name="AE Speed", default=0.5, min=0.02, max=1.0,
-        options={"HIDDEN"},
-        description="Adaptation speed toward the luminance target",
+        description=_d("ae_speed"),
     )
     ae_center_weight: IntProperty(
-        name="Center Weight", default=100, min=0, max=100,
+        name="Center Weight", default=70, min=0, max=100,
         subtype="PERCENTAGE",
-        options={"HIDDEN"},
-        description="Weight the viewport center more when sampling",
+        update=_on_ae_center_weight,
+        description=_d("ae_center_weight"),
+    )
+    ae_sample_jitter: BoolProperty(
+        name="Sample Jitter", default=True,
+        description=_d("ae_sample_jitter"),
+    )
+    ae_fast_converge: BoolProperty(
+        name="Fast Converge", default=True,
+        description=_d("ae_fast_converge"),
     )
     ae_gamma: FloatProperty(
         name="Parameter Correction", default=1.0, min=0.1, max=5.0, soft_max=3.0,
         update=_on_ae_gamma,
-        description="Color Management gamma while Auto Exposure is active",
+        description=_d("ae_gamma"),
     )
+    ae_frame_only: BoolProperty(default=False, options={"HIDDEN"})
     distance: FloatProperty(name="Distance", default=2.5, min=0.3, max=50.0,
                             soft_max=10.0, update=_live,
-                            description="Light distance from the target (x radius)")
+                            description=_d("distance"))
     color_strength: FloatProperty(name="Color Strength", default=0.85, min=0.0,
                                   max=2.0, soft_max=1.5, update=_live,
-                                  description="How strongly reference colors tint lights")
+                                  description=_d("color_strength"))
     color_saturation: FloatProperty(name="Saturation", default=1.0, min=0.0,
                                     max=3.0, soft_max=2.0, update=_live,
-                                    description="Boost or mute color saturation in the rig")
+                                    description=_d("color_saturation"))
     tone_shadows: FloatProperty(name="Shadows", default=1.0, min=0.05, max=3.0,
                                 soft_max=2.0, update=_live,
-                                description="Lift or deepen fill, ambient, and world")
+                                description=_d("tone_shadows"))
     tone_highlights: FloatProperty(name="Highlights", default=1.0, min=0.05, max=3.0,
                                    soft_max=2.0, update=_live,
-                                   description="Brighten or tame key, rim, and accent lights")
+                                   description=_d("tone_highlights"))
     contrast_boost: FloatProperty(name="Contrast", default=1.0, min=0.05, max=12.0,
                                   soft_max=6.0, update=_live,
-                                  description="Push or relax the key/fill contrast")
+                                  description=_d("contrast_boost"))
     rig_rotation: FloatProperty(
         name="Rotate", default=0.0, min=-6.2832, max=6.2832, subtype="ANGLE",
-        update=_rotate, description="Orbit the whole light rig around the target",
+        update=_rotate, description=_d("rig_rotation"),
     )
     rig_height: FloatProperty(
         name="Height", default=0.0, soft_min=-10.0, soft_max=10.0, subtype="DISTANCE",
-        update=_height, description="Slide the whole light rig up or down along Z",
+        update=_height, description=_d("rig_height"),
     )
 
     use_world: BoolProperty(name="Set World / Ambient", default=True, update=_live,
-                            description="Drive the world background from the reference")
+                            description=_d("use_world"))
 
     auto_timer: BoolProperty(default=False, options={"HIDDEN"})
     timer_interval: FloatProperty(
         name="Interval", default=0.3, min=0.05, max=5.0, subtype="TIME",
-        description="Seconds between automatic re-generations",
+        description=_d("timer_interval"),
     )
 
     float_show: BoolProperty(name="Float Reference", default=False,
                              update=overlay.on_toggle,
-                             description="Show the reference floating in the viewport")
+                             description=_d("float_show"))
     float_opacity: FloatProperty(name="Opacity", default=0.9, min=0.05, max=1.0,
-                                 update=overlay.on_redraw)
+                                 update=overlay.on_redraw,
+                                 description=_d("float_opacity"))
     float_scale: FloatProperty(name="Size", default=1.0, min=0.2, max=3.0,
-                               update=overlay.on_redraw)
+                               update=overlay.on_redraw,
+                               description=_d("float_scale"))
     float_corner: EnumProperty(
         name="Corner", items=translations.corner_items, update=overlay.on_redraw,
+        description=_d("float_corner"),
     )
 
     bk_view_exposure: FloatProperty(default=0.0, options={"HIDDEN"})
@@ -498,6 +567,13 @@ def sync_language(scene=None):
                 s.language = lang
     finally:
         _LANG_SYNCING = False
+    active = lang
+    for sc in scenes:
+        s = getattr(sc, "rolllux", None)
+        if s is not None and s.lang_user_set:
+            active = s.language
+            break
+    translations.sync_i18n(active)
 
 
 def needs_default_reference(scene) -> bool:
@@ -570,10 +646,6 @@ def _deferred_init():
     except Exception:
         pass
     try:
-        translations.sync_descriptions()
-    except Exception:
-        pass
-    try:
         ensure_default_reference()
     except Exception:
         pass
@@ -583,10 +655,6 @@ def _deferred_init():
 @persistent
 def _on_load(_dummy):
     sync_language()
-    try:
-        translations.sync_descriptions()
-    except Exception:
-        pass
     try:
         ensure_default_reference()
     except Exception:
@@ -608,6 +676,8 @@ def register():
     bpy.types.Scene.rolllux = PointerProperty(type=RLLM_Settings)
     bpy.types.Scene.rolllux_result = PointerProperty(type=RLLM_AnalysisResult)
     bpy.types.Object.rolllux_light = PointerProperty(type=RLLM_LightInfo)
+    translations.register_i18n_classes(RLLM_Settings, RLLM_LightInfo)
+    translations.sync_i18n(translations.detect_language())
     if _on_load not in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.append(_on_load)
     bpy.app.timers.register(_deferred_init, first_interval=0.0)

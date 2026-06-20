@@ -21,6 +21,7 @@ INCLUDE = (
     "properties.py",
     "operators.py",
     "lighting.py",
+    "ae_metering.py",
     "auto_exposure.py",
     "analysis.py",
     "ui.py",

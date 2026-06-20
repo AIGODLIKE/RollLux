@@ -257,6 +257,120 @@ def test_exposure_factor():
     print("OK exposure factor")
 
 
+def test_auto_exposure_metering():
+    from ae_metering import meter_luminance, compute_target_ev, target_luminance, prepare_samples
+
+    samples = [0.05, 0.1, 0.12, 0.15, 0.9, 0.95]
+    center = [0.1, 0.12, 0.15]
+    avg = meter_luminance(samples, center, "AVERAGE", 0.0)
+    assert abs(avg - sum(samples) / len(samples)) < 1e-6
+    med = meter_luminance(samples, center, "MEDIAN", 0.0)
+    assert abs(med - 0.135) < 1e-6
+    hi = meter_luminance(samples, center, "HIGHLIGHT", 0.0)
+    assert hi >= 0.9
+    p60 = meter_luminance(samples, center, "P60", 0.0)
+    assert 0.12 <= p60 <= 0.95
+    trim = meter_luminance(samples, center, "TRIM_MEAN", 0.0)
+    assert trim < hi
+    log_avg = meter_luminance(samples, center, "LOG_AVERAGE", 0.0)
+    assert log_avg > 0.0
+
+    prepared, ok = prepare_samples([0.0, 0.0, 0.0, 0.0, 0.1])
+    assert not ok
+    prepared, ok = prepare_samples([0.0, 0.1, 0.2, 0.3])
+    assert ok and len(prepared) == 4
+
+    ev = compute_target_ev(0.36, 0.18, 0.0)
+    assert abs(ev - (-1.0)) < 1e-6
+    ev_bias = compute_target_ev(0.36, 0.18, -1.0)
+    assert abs(ev_bias - (-2.0)) < 1e-6
+
+    class _Res:
+        valid = True
+        mean_luminance = 0.42
+
+    class _Settings:
+        ae_mode = "REFERENCE"
+        cache_mean_lum = 0.3
+
+    class _Scene:
+        rolllux_result = _Res()
+
+    assert abs(target_luminance(_Settings(), _Scene()) - 0.42) < 1e-6
+    print("OK auto exposure metering")
+
+
+def test_ae_enum_i18n():
+    import translations
+
+    class _S:
+        language = "ZH"
+
+    s = _S()
+    for ident, name, desc in translations.ae_apply_to_items(s, None):
+        assert not name.startswith("ae_"), name
+        assert name in ("色彩管理", "灯光组"), name
+    for ident, name, desc in translations.ae_center_preset_items(s, None):
+        assert not name.startswith("ae_"), name
+    assert translations.tr("ZH", "ae_center_balanced") == "均衡"
+    print("OK ae enum i18n")
+
+
+def test_ui_mode_i18n():
+    import translations
+
+    class _S:
+        language = "ZH"
+
+    s = _S()
+    names = [name for _id, name, _d in translations.ui_mode_items(s, None)]
+    assert "快速" in names and "专业" in names
+    print("OK ui mode i18n")
+
+
+def test_i18n_completeness():
+    import translations
+    from translations import TR, _PROP_DESC, _OPERATOR_LABELS
+
+    for key, entry in TR.items():
+        assert isinstance(entry, dict), key
+        for lang in ("EN", "ZH", "JA"):
+            assert lang in entry and str(entry[lang]).strip(), f"{key}.{lang}"
+
+    for prop, desc_key in _PROP_DESC.items():
+        assert desc_key in TR, f"_PROP_DESC {prop} -> {desc_key}"
+
+    ui_keys = set()
+    import re, os
+    root = os.path.dirname(__file__)
+    for fn in ("ui.py", "operators.py"):
+        text = open(os.path.join(root, fn), encoding="utf-8").read()
+        ui_keys.update(re.findall(r"""tr\(lang,\s*['\"]([a-zA-Z0-9_]+)['\"]""", text))
+    for key in ui_keys:
+        assert key in TR, f"missing UI key {key!r}"
+
+    for bl_id, tr_key in _OPERATOR_LABELS.items():
+        assert tr_key in TR, f"operator {bl_id} -> {tr_key}"
+
+    class _S:
+        language = "ZH"
+
+    for ident, name, _desc in translations.ui_mode_items(_S(), None):
+        assert name in ("快速", "专业"), name
+    print("OK i18n completeness")
+
+
+def test_blender_reg_map():
+    import translations
+
+    raw = {"Hello": "你好", "Hello.": "你好。"}
+    reg = translations._blender_reg_map(raw)
+    assert (None, "Hello") in reg
+    assert (None, "Hello.") in reg
+    assert all(isinstance(k, tuple) and len(k) == 2 for k in reg)
+    print("OK blender reg map")
+
+
 if __name__ == "__main__":
     test_dual_gel_detects_accent()
     test_split_portrait_hard_contrast()
@@ -273,4 +387,9 @@ if __name__ == "__main__":
     test_color_strategies()
     test_palette_tracks_count()
     test_exposure_factor()
+    test_auto_exposure_metering()
+    test_ae_enum_i18n()
+    test_ui_mode_i18n()
+    test_i18n_completeness()
+    test_blender_reg_map()
     print("\nAll offline tests passed.")

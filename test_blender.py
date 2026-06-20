@@ -161,6 +161,13 @@ def main():
     )
     if portrait_desc != translations.tr("ZH", "mode_portrait_desc"):
         _fail(f"mode item desc ZH: {portrait_desc!r}")
+    translations.sync_i18n("ZH")
+    height_tip = RLLM_Settings.bl_rna.properties["rig_height"].description
+    if not any("\u4e00" <= c <= "\u9fff" for c in height_tip):
+        _fail(f"rig_height tooltip not ZH: {height_tip!r}")
+    world_tip = RLLM_Settings.bl_rna.properties["use_world"].description
+    if not any("\u4e00" <= c <= "\u9fff" for c in world_tip):
+        _fail(f"use_world tooltip not ZH: {world_tip!r}")
     print("tooltip i18n OK")
 
     # Clipboard paste (best-effort; needs a real OS clipboard).

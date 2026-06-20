@@ -113,6 +113,124 @@ TR = {
     "intensity": {"EN": "Intensity", "ZH": "\u5f3a\u5ea6", "JA": "\u5f37\u5ea6"},
     "exposure": {"EN": "Exposure", "ZH": "\u66dd\u5149\u7cfb\u6570", "JA": "\u9732\u5149\u500d\u7387"},
     "auto_exposure": {"EN": "Auto Exposure", "ZH": "\u81ea\u52a8\u66dd\u5149", "JA": "\u81ea\u52d5\u9732\u5149"},
+    "ae_fine_section": {
+        "EN": "Auto Exposure",
+        "ZH": "\u81ea\u52a8\u66dd\u5149",
+        "JA": "\u81ea\u52d5\u9732\u5149",
+    },
+    "ae_mode": {"EN": "AE Mode", "ZH": "AE \u6a21\u5f0f", "JA": "AE \u30e2\u30fc\u30c9"},
+    "ae_mode_average": {"EN": "Average", "ZH": "\u5e73\u5747", "JA": "\u5e73\u5747"},
+    "ae_mode_average_desc": {
+        "EN": "Mean luminance with optional center weighting (classic 18% grey target)",
+        "ZH": "\u52a0\u6743\u5e73\u5747\u4eae\u5ea6\uff0c\u4ee5 18% \u4e2d\u7070\u4e3a\u76ee\u6807",
+        "JA": "\u4e2d\u592e\u91cd\u307f\u4ed8\u304d\u5e73\u5747\u8f89\u5ea6\uff0818% \u30b0\u30ec\u30fc\u76ee\u6a19\uff09",
+    },
+    "ae_mode_median": {"EN": "Median", "ZH": "\u4e2d\u4f4d\u6570", "JA": "\u4e2d\u592e\u5024"},
+    "ae_mode_median_desc": {
+        "EN": "Median luminance — resists small bright highlights skewing exposure",
+        "ZH": "\u4e2d\u4f4d\u6570\u4eae\u5ea6\uff0c\u5c0f\u9ad8\u5149\u70b9\u4e0d\u6613\u62fd\u4e71\u66dd\u5149",
+        "JA": "\u4e2d\u592e\u5024\u8f89\u5ea6\u2014\u5c0f\u3055\u306a\u30cf\u30a4\u30e9\u30a4\u30c8\u306b\u5f37\u3044",
+    },
+    "ae_mode_highlight": {"EN": "Highlight", "ZH": "\u9ad8\u5149\u4f18\u5148", "JA": "\u30cf\u30a4\u30e9\u30a4\u30c8\u512a\u5148"},
+    "ae_mode_highlight_desc": {
+        "EN": "Meters toward bright areas (85th percentile) to protect highlights",
+        "ZH": "85 \u5206\u4f4d\u91c7\u6837\u504f\u5411\u9ad8\u5149\u533a\uff0c\u51cf\u5c11\u9ad8\u5149\u8fc7\u66dd",
+        "JA": "85 \u30d1\u30fc\u30bb\u30f3\u30bf\u30a4\u30eb\u3067\u9ad8\u8f89\u5ea6\u5074\u3092\u91cd\u8996",
+    },
+    "ae_mode_reference": {"EN": "Reference", "ZH": "\u53c2\u8003\u56fe", "JA": "\u53c2\u7167\u56fe"},
+    "ae_mode_reference_desc": {
+        "EN": "Target the analyzed reference image mean luminance instead of 18% grey",
+        "ZH": "\u4ee5\u53c2\u8003\u56fe\u5206\u6790\u5e73\u5747\u4eae\u5ea6\u4e3a\u76ee\u6807\uff0c\u800c\u975e 18% \u4e2d\u7070",
+        "JA": "18% \u30b0\u30ec\u30fc\u3067\u306f\u306a\u304f\u53c2\u7167\u56fe\u306e\u5e73\u5747\u8f89\u5ea6\u3092\u76ee\u6a19",
+    },
+    "ae_mode_p60": {"EN": "60th Percentile", "ZH": "60 \u5206\u4f4d", "JA": "60 \u30d1\u30fc\u30bb\u30f3\u30bf\u30a4\u30eb"},
+    "ae_mode_p60_desc": {
+        "EN": "60th percentile brightness — between average and highlight",
+        "ZH": "60 \u5206\u4f4d\u4eae\u5ea6\uff0c\u4ecb\u4e8e\u5e73\u5747\u4e0e\u9ad8\u5149\u4e4b\u95f4",
+        "JA": "60 \u30d1\u30fc\u30bb\u30f3\u30bf\u30a4\u30eb \u2014 \u5e73\u5747\u3068\u30cf\u30a4\u30e9\u30a4\u30c8\u306e\u4e2d\u9593",
+    },
+    "ae_mode_trim_mean": {"EN": "Trim Mean", "ZH": "\u622a\u5c3e\u5e73\u5747", "JA": "\u30c8\u30ea\u30e0\u5e73\u5747"},
+    "ae_mode_trim_mean_desc": {
+        "EN": "Drop top/bottom 10% then average — resists specular spikes",
+        "ZH": "\u53bb\u6389\u6700\u9ad8/\u6700\u4f4e 10% \u540e\u53d6\u5e73\u5747\uff0c\u6297\u9ad8\u5149\u6ea2\u51fa",
+        "JA": "\u4e0a\u4e0b 10% \u3092\u9664\u3044\u3066\u5e73\u5747 \u2014 \u30b9\u30da\u30ad\u30e5\u30e9\u306b\u5f37\u3044",
+    },
+    "ae_mode_log_average": {"EN": "Log Average", "ZH": "\u5bf9\u6570\u5e73\u5747", "JA": "\u5bfe\u6570\u5e73\u5747"},
+    "ae_mode_log_average_desc": {
+        "EN": "Geometric mean in log space — stable for HDR scenes",
+        "ZH": "\u5bf9\u6570\u57df\u51e0\u4f55\u5e73\u5747\uff0c\u9ad8\u52a8\u6001\u8303\u56f4\u66f4\u7a33",
+        "JA": "\u5bfe\u6570\u7a7a\u9593\u306e\u5e7e\u4f55\u5e73\u5747 \u2014 HDR \u306b\u7a33\u5b9a",
+    },
+    "ae_apply_to_cm": {"EN": "Color Management", "ZH": "\u8272\u5f69\u7ba1\u7406", "JA": "\u30ab\u30e9\u30fc\u30de\u30cd\u30b8\u30e1\u30f3\u30c8"},
+    "ae_apply_to_cm_desc": {
+        "EN": "Drive scene.view_settings.exposure (viewport CM)",
+        "ZH": "\u9a71\u52a8\u573a\u666f\u8272\u5f69\u7ba1\u7406\u66dd\u5149\uff08\u89c6\u53e3 CM\uff09",
+        "JA": "scene.view_settings.exposure \u3092\u5236\u5fa1",
+    },
+    "ae_apply_to_lights": {"EN": "Light Rig", "ZH": "\u706f\u5149\u7ec4", "JA": "\u30e9\u30a4\u30c8\u30ea\u30b0"},
+    "ae_apply_to_lights_desc": {
+        "EN": "Scale light energy only — CM stays at your settings",
+        "ZH": "\u53ea\u8c03\u706f\u5149\u80fd\u91cf\uff0c\u8272\u5f69\u7ba1\u7406\u4fdd\u6301\u7528\u6237\u8bbe\u5b9a",
+        "JA": "\u30e9\u30a4\u30c8\u306e\u307f\u8abf\u6574 \u2014 CM \u306f\u30e6\u30fc\u30b6\u30fc\u8a2d\u5b9a\u306e\u307e\u307e",
+    },
+    "ae_center_full": {"EN": "Full Frame", "ZH": "\u5168\u753b\u9762", "JA": "\u5168\u753b\u9762"},
+    "ae_center_full_desc": {"EN": "Weight entire viewport equally", "ZH": "\u5168\u89c6\u53e3\u7b49\u6743\u91c7\u6837", "JA": "\u30d3\u30e5\u30fc\u30dd\u30fc\u30c8\u5168\u4f53\u3092\u7b49\u91cd\u307f"},
+    "ae_center_balanced": {"EN": "Balanced", "ZH": "\u5747\u8861", "JA": "\u30d0\u30e9\u30f3\u30b9"},
+    "ae_center_balanced_desc": {"EN": "70% center weight (default)", "ZH": "70% \u4e2d\u5fc3\u52a0\u6743\uff08\u9ed8\u8ba4\uff09", "JA": "\u4e2d\u592e 70% \u91cd\u307f\uff08\u65e2\u5b9a\uff09"},
+    "ae_center_center": {"EN": "Center", "ZH": "\u4e2d\u5fc3", "JA": "\u4e2d\u592e"},
+    "ae_center_center_desc": {"EN": "Meter only the viewport center", "ZH": "\u53ea\u6d4b\u89c6\u53e3\u4e2d\u5fc3\u533a\u57df", "JA": "\u753b\u9762\u4e2d\u592e\u306e\u307f\u6e2c\u5149"},
+    "ae_center_frame": {"EN": "Subject Frame", "ZH": "\u4e3b\u4f53\u6846", "JA": "\u88ab\u5199\u4f53\u67a0"},
+    "ae_center_frame_desc": {
+        "EN": "Camera border or center crop — subject-weighted",
+        "ZH": "\u76f8\u673a\u6846\u6216\u4e2d\u5fc3\u88c1\u5207\uff0c\u4ee5\u4e3b\u4f53\u4e3a\u51c6",
+        "JA": "\u30ab\u30e1\u30e9\u67a0\u307e\u305f\u306f\u4e2d\u592e\u30af\u30ed\u30c3\u30d7",
+    },
+    "ae_center_custom": {"EN": "Custom", "ZH": "\u81ea\u5b9a\u4e49", "JA": "\u30ab\u30b9\u30bf\u30e0"},
+    "ae_center_custom_desc": {"EN": "Manual center weight slider", "ZH": "\u624b\u52a8\u8c03\u8282\u4e2d\u5fc3\u6743\u91cd", "JA": "\u624b\u52d5\u3067\u4e2d\u592e\u91cd\u307f"},
+    "ae_apply_short": {"EN": "Apply", "ZH": "\u5e94\u7528", "JA": "\u9069\u7528"},
+    "ae_sampling_short": {"EN": "Sampling", "ZH": "\u91c7\u6837", "JA": "\u30b5\u30f3\u30d7\u30ea\u30f3\u30b0"},
+    "ae_jitter_short": {"EN": "Jitter", "ZH": "\u6296\u52a8", "JA": "\u30b8\u30c3\u30bf\u30fc"},
+    "ae_light_ev": {
+        "EN": "Light EV: {ev}",
+        "ZH": "\u706f\u5149 EV\uff1a{ev}",
+        "JA": "\u30e9\u30a4\u30c8 EV: {ev}",
+    },
+    "ae_bake": {
+        "EN": "Apply to Render Settings",
+        "ZH": "\u5199\u5165\u6e32\u67d3\u8bbe\u7f6e",
+        "JA": "\u30ec\u30f3\u30c0\u30fc\u8a2d\u5b9a\u306b\u9069\u7528",
+    },
+    "ae_apply_exposure": {
+        "EN": "Apply Exposure",
+        "ZH": "\u5e94\u7528\u66dd\u5149",
+        "JA": "\u66dd\u5149\u3092\u9069\u7528",
+    },
+    "msg_ae_baked": {
+        "EN": "Auto exposure applied to Color Management",
+        "ZH": "\u81ea\u52a8\u66dd\u5149\u5df2\u5199\u5165\u8272\u5f69\u7ba1\u7406",
+        "JA": "\u81ea\u52d5\u9732\u5149\u3092\u30ab\u30e9\u30fc\u30de\u30cd\u30b8\u30e1\u30f3\u30c8\u306b\u9069\u7528\u3057\u307e\u3057\u305f",
+    },
+    "msg_ae_applied_light": {
+        "EN": "Auto exposure applied to light intensity",
+        "ZH": "\u81ea\u52a8\u66dd\u5149\u5df2\u5199\u5165\u706f\u5149\u5f3a\u5ea6",
+        "JA": "\u81ea\u52d5\u9732\u5149\u3092\u30e9\u30a4\u30c8\u5f37\u5ea6\u306b\u9069\u7528\u3057\u307e\u3057\u305f",
+    },
+    "ae_ev_bias": {"EN": "EV Bias", "ZH": "EV \u8865\u507f", "JA": "EV \u88dc\u6b63"},
+    "ae_ev_short": {"EN": "EV", "ZH": "EV", "JA": "EV"},
+    "ae_mode_short": {"EN": "Mode", "ZH": "\u6a21\u5f0f", "JA": "\u30e2\u30fc\u30c9"},
+    "ae_speed_short": {"EN": "Speed", "ZH": "\u901f\u5ea6", "JA": "\u901f\u5ea6"},
+    "ae_fast_converge_short": {
+        "EN": "Fast Converge",
+        "ZH": "\u5feb\u901f\u6536\u655b",
+        "JA": "\u5feb\u901f\u53ce\u675f",
+    },
+    "ae_fast_converge": {
+        "EN": "Fast Converge",
+        "ZH": "\u5feb\u901f\u6536\u655b",
+        "JA": "\u5feb\u901f\u53ce\u675f",
+    },
+    "ae_center_short": {"EN": "Center", "ZH": "\u4e2d\u5fc3", "JA": "\u4e2d\u592e"},
+    "ae_gamma_short": {"EN": "Gamma", "ZH": "Gamma", "JA": "Gamma"},
     "ae_speed": {"EN": "AE Speed", "ZH": "AE \u901f\u5ea6", "JA": "AE \u901f\u5ea6"},
     "ae_center_weight": {"EN": "Center Weight", "ZH": "\u4e2d\u5fc3\u52a0\u6743", "JA": "\u4e2d\u592e\u91cd\u307f"},
     "ae_gamma": {"EN": "Parameter Correction", "ZH": "\u53c2\u6570\u6821\u6b63", "JA": "\u30d1\u30e9\u30e1\u30fc\u30bf\u88dc\u6b63"},
@@ -198,6 +316,22 @@ TR = {
     "section_energy": {"EN": "Energy & Exposure", "ZH": "\u80fd\u91cf\u4e0e\u66dd\u5149", "JA": "\u5149\u91cf\u30fb\u9732\u5149"},
     "section_rig": {"EN": "Placement", "ZH": "\u4f4d\u7f6e\u4e0e\u65cb\u8f6c", "JA": "\u914d\u7f6e\u30fb\u56de\u8ee2"},
     "section_color": {"EN": "Color & World", "ZH": "\u989c\u8272\u4e0e\u73af\u5883", "JA": "\u8272\u30fb\u74b0\u5883"},
+    "section_ae": {"EN": "Auto Exposure", "ZH": "\u81ea\u52a8\u66dd\u5149", "JA": "\u81ea\u52d5\u9732\u5149"},
+    "section_overlay": {"EN": "Viewport Overlay", "ZH": "\u89c6\u53e3\u53c2\u8003\u56fe", "JA": "\u30d3\u30e5\u30fc\u53c2\u7167"},
+    "section_lights": {"EN": "Lights", "ZH": "\u706f\u5149", "JA": "\u30e9\u30a4\u30c8"},
+    "section_analysis": {"EN": "Analysis", "ZH": "\u5206\u6790\u7ed3\u679c", "JA": "\u89e3\u6790\u7d50\u679c"},
+    "ui_mode_quick": {"EN": "Quick", "ZH": "\u5feb\u901f", "JA": "\u30af\u30a4\u30c3\u30af"},
+    "ui_mode_pro": {"EN": "Pro", "ZH": "\u4e13\u4e1a", "JA": "\u30d7\u30ed"},
+    "ui_mode_quick_desc": {
+        "EN": "Reference, presets, and one-click generate",
+        "ZH": "\u53c2\u8003\u56fe\u3001\u9884\u8bbe\u4e0e\u4e00\u952e\u751f\u6210",
+        "JA": "\u53c2\u7167\u3001\u30d7\u30ea\u30bb\u30c3\u30c8\u3001\u30ef\u30f3\u30af\u30ea\u30c3\u30af\u751f\u6210",
+    },
+    "ui_mode_pro_desc": {
+        "EN": "Full controls grouped by category",
+        "ZH": "\u5206\u7c7b\u6536\u7eb3\u7684\u5b8c\u6574\u53c2\u6570",
+        "JA": "\u30ab\u30e6\u30b9\u30c8\u5225\u306e\u5168\u30d1\u30e9\u30e1\u30fc\u30bf",
+    },
     "preset_section": {"EN": "Strategy", "ZH": "\u7b56\u7565", "JA": "\u30b9\u30c8\u30e9\u30c6\u30b8\u30fc"},
     "ref_section": {"EN": "Lighting Distribution", "ZH": "\u7167\u660e\u5206\u5e03", "JA": "\u7167\u660e\u5206\u5e03"},
     "float_section": {"EN": "Floating Reference", "ZH": "\u53c2\u8003\u56fe\u60ac\u6d6e", "JA": "\u30d5\u30ed\u30fc\u30c6\u30a3\u30f3\u30b0\u53c2\u7167"},
@@ -308,6 +442,37 @@ TR = {
         "ZH": "\u8bf7\u5148\u6253\u5f00 3D \u89c6\u53e3",
         "JA": "3D \u30d3\u30e5\u30fc\u3092\u958b\u3044\u3066\u304f\u3060\u3055\u3044",
     },
+    "err_no_window": {
+        "EN": "No window available for timer",
+        "ZH": "\u65e0\u53ef\u7528\u7a97\u53e3\uff0c\u65e0\u6cd5\u542f\u52a8\u5b9a\u65f6\u5668",
+        "JA": "タイマー用のウィンドウがありません",
+    },
+    "op_open_image": {
+        "EN": "Open Reference Image",
+        "ZH": "\u6253\u5f00\u53c2\u8003\u56fe",
+        "JA": "\u53c2\u7167\u753b\u50cf\u3092\u958b\u304f",
+    },
+    "op_preset_step": {"EN": "Step Preset", "ZH": "\u5207\u6362\u7b56\u7565", "JA": "\u30d7\u30ea\u30bb\u30c3\u30c8\u3092\u5207\u66ff"},
+    "op_random_preset": {"EN": "Random Preset", "ZH": "\u968f\u673a\u7b56\u7565", "JA": "\u30e9\u30f3\u30c0\u30e0\u30d7\u30ea\u30bb\u30c3\u30c8"},
+    "op_random_reference": {"EN": "Random Reference", "ZH": "\u968f\u673a\u53c2\u8003\u56fe", "JA": "\u30e9\u30f3\u30c0\u30e0\u53c2\u7167"},
+    "op_auto_timer": {"EN": "Auto Timer", "ZH": "\u5b9a\u65f6\u751f\u6210", "JA": "\u5b9a\u6642\u751f\u6210"},
+    "op_reference_step": {"EN": "Step Reference", "ZH": "\u5207\u6362\u53c2\u8003\u56fe", "JA": "\u53c2\u7167\u3092\u5207\u66ff"},
+    "op_delete_light": {"EN": "Delete Light", "ZH": "\u5220\u9664\u706f\u5149", "JA": "\u30e9\u30a4\u30c8\u524a\u9664"},
+    "desc_ui_mode": {
+        "EN": "Quick or Pro panel layout",
+        "ZH": "快速或专业面板布局",
+        "JA": "クイック／プロのパネルレイアウト",
+    },
+    "desc_ae_ev_bias": {
+        "EN": "Exposure compensation in stops added to the auto exposure target",
+        "ZH": "在自动曝光目标上叠加的曝光补偿（档）",
+        "JA": "自動露出目標に加算する露出補正（段）",
+    },
+    "desc_ae_mode": {
+        "EN": "How viewport samples are combined and what luminance target is used",
+        "ZH": "视口采样合成方式与亮度目标",
+        "JA": "ビューポートサンプルの合成方法と輝度目標",
+    },
     "desc_ae_speed": {
         "EN": "Speed at which exposure reaches the luminance target",
         "ZH": "\u66dd\u5149\u8ddf\u968f\u4eae\u5ea6\u76ee\u6807\u7684\u901f\u5ea6",
@@ -322,6 +487,26 @@ TR = {
         "EN": "Color Management gamma (parameter correction) while Auto Exposure is enabled",
         "ZH": "\u5f00\u542f\u81ea\u52a8\u66dd\u5149\u65f6\u7684\u53c2\u6570\u6821\u6b63\uff08\u8272\u5f69\u7ba1\u7406\u4f3d\u9a6c\uff09",
         "JA": "\u81ea\u52d5\u9732\u5149\u6709\u52b9\u6642\u306e\u30d1\u30e9\u30e1\u30fc\u30bf\u88dc\u6b63\uff08\u8272\u8abf\u6574\u30ac\u30f3\u30de\uff09",
+    },
+    "desc_ae_apply_to": {
+        "EN": "Whether AE drives Color Management exposure or light rig energy",
+        "ZH": "自动曝光控制色彩管理还是灯光能量",
+        "JA": "AE が CM 露出かライトエネルギーを制御するか",
+    },
+    "desc_ae_center_preset": {
+        "EN": "Quick preset for viewport sampling region and center weight",
+        "ZH": "视口采样区域与中心权重的快捷预设",
+        "JA": "サンプリング領域と中央重みのプリセット",
+    },
+    "desc_ae_sample_jitter": {
+        "EN": "Rotate sample grid each frame to reduce moiré misreads",
+        "ZH": "每帧轮换采样点，减少摩尔纹误判",
+        "JA": "フレームごとにサンプル位置をずらしてモアレを軽減",
+    },
+    "desc_ae_fast_converge": {
+        "EN": "Stop auto exposure when remaining error or the next EV step is below 0.1",
+        "ZH": "剩余误差或下一步 EV 调整幅度小于 0.1 时停止自动曝光",
+        "JA": "残り誤差または次の EV 調整量が 0.1 未満なら自動露出を停止",
     },
     "desc_distance": {"EN": "Light distance from the target (x subject radius)",
                       "ZH": "\u706f\u5149\u4e0e\u76ee\u6807\u7684\u8ddd\u79bb\uff08\u00d7\u7269\u4f53\u534a\u5f84\uff09",
@@ -362,6 +547,9 @@ TR = {
     "desc_float_scale": {"EN": "Size of the floating reference overlay",
                          "ZH": "\u60ac\u6d6e\u53c2\u8003\u56fe\u7684\u5927\u5c0f",
                          "JA": "\u30d5\u30ed\u30fc\u30c6\u30a3\u30f3\u30b0\u53c2\u7167\u306e\u5927\u304d\u3055"},
+    "desc_float_corner": {"EN": "Corner anchor for the floating reference",
+                          "ZH": "\u60ac\u6d6e\u53c2\u8003\u56fe\u7684\u951a\u70b9\u89d2\u843d",
+                          "JA": "\u30d5\u30ed\u30fc\u30c6\u30a3\u30f3\u30b0\u53c2\u7167\u306e\u914d\u7f6e\u89d2"},
     "desc_default_ref": {"EN": "Default: Broad Light (built-in)",
                          "ZH": "\u9ed8\u8ba4\uff1a\u5bbd\u5149\uff08\u5185\u7f6e\u7167\u660e\u5206\u5e03\uff09",
                          "JA": "\u30c7\u30d5\u30a9\u30eb\u30c8\uff1a\u30d6\u30ed\u30fc\u30c9\u30e9\u30a4\u30c8\uff08\u5185\u8535\uff09"},
@@ -653,6 +841,7 @@ for _rid, _v in _REF_I18N.items():
 # RNA property name -> translation key for tooltip sync.
 _PROP_DESC = {
     "language": "desc_language",
+    "ui_mode": "desc_ui_mode",
     "reference_image": "desc_reference",
     "lighting_preset": "desc_lighting_preset",
     "reference_preset": "desc_reference_preset",
@@ -666,9 +855,15 @@ _PROP_DESC = {
     "intensity": "desc_intensity",
     "exposure": "desc_exposure",
     "auto_exposure": "desc_auto_exposure",
+    "ae_mode": "desc_ae_mode",
+    "ae_ev_bias": "desc_ae_ev_bias",
     "ae_speed": "desc_ae_speed",
     "ae_center_weight": "desc_ae_center_weight",
     "ae_gamma": "desc_ae_gamma",
+    "ae_apply_to": "desc_ae_apply_to",
+    "ae_center_preset": "desc_ae_center_preset",
+    "ae_sample_jitter": "desc_ae_sample_jitter",
+    "ae_fast_converge": "desc_ae_fast_converge",
     "distance": "desc_distance",
     "color_strength": "desc_color_strength",
     "color_saturation": "desc_color_saturation",
@@ -682,6 +877,7 @@ _PROP_DESC = {
     "float_show": "desc_float_show",
     "float_opacity": "desc_float_opacity",
     "float_scale": "desc_float_scale",
+    "float_corner": "desc_float_corner",
     "lock_intensity": "desc_lock_intensity",
     "lock_exposure": "desc_lock_exposure",
     "lock_distance": "desc_lock_distance",
@@ -694,32 +890,165 @@ _PROP_DESC = {
     "lock_contrast_boost": "desc_lock_contrast_boost",
 }
 
+# RNA property name= (English) -> TR label key (icon-only controls).
+_PROP_NAME = {
+    "auto_exposure": "auto_exposure",
+    "gain": "light_energy",
+}
+
+_OPERATOR_CLASSES: list = []
+
+_OPERATOR_LABELS = {
+    "rolllux.paste_image": "btn_paste",
+    "rolllux.open_image": "op_open_image",
+    "rolllux.analyze": "analyze",
+    "rolllux.generate": "generate",
+    "rolllux.clear": "clear",
+    "rolllux.preset_step": "op_preset_step",
+    "rolllux.random_preset": "op_random_preset",
+    "rolllux.random_reference": "op_random_reference",
+    "rolllux.auto_timer": "op_auto_timer",
+    "rolllux.reference_step": "op_reference_step",
+    "rolllux.set_rendered": "set_rendered",
+    "rolllux.bake_ae": "ae_apply_exposure",
+    "rolllux.delete_light": "op_delete_light",
+}
+
+
+def register_operators_i18n(*classes) -> None:
+    global _OPERATOR_CLASSES
+    _OPERATOR_CLASSES = list(classes)
+
+
+def apply_operator_i18n(lang: str | None = None) -> None:
+    lang = lang or "EN"
+    for cls in _OPERATOR_CLASSES:
+        key = _OPERATOR_LABELS.get(getattr(cls, "bl_idname", ""))
+        if key:
+            cls.bl_label = tr(lang, key)
+
+
+def rna_desc(prop: str) -> str:
+    """English RNA description string (translated at display time via sync_i18n)."""
+    key = _PROP_DESC.get(prop)
+    return tr("EN", key) if key else ""
+
+
+_RNA_DESC_EN: dict[tuple[str, str], str] = {}
+_RNA_NAME_EN: dict[tuple[str, str], str] = {}
+_I18N_CLASSES: list = []
+
+
+def register_i18n_classes(*classes) -> None:
+    """Call from properties.register() after RNA types are registered."""
+    global _I18N_CLASSES
+    _I18N_CLASSES = list(classes)
+
+
+def _set_rna_str(rna_prop, attr: str, value: str) -> None:
+    try:
+        setattr(rna_prop, attr, value)
+    except (AttributeError, TypeError):
+        pass
+
+
+def _translation_map(target: str) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for key, entry in TR.items():
+        if not key.startswith("desc_"):
+            continue
+        en = entry.get("EN", "")
+        loc = entry.get(target, "")
+        if not en or not loc:
+            continue
+        mapping[en] = loc
+        mapping[f"{en}."] = loc
+    return mapping
+
+
+def _blender_reg_map(string_map: dict[str, str]) -> dict[tuple[str | None, str], str]:
+    """Blender 5.1+ requires (msgctxt, msgid) tuple keys in translation dicts."""
+    return {(None, msgid): text for msgid, text in string_map.items()}
+
+
+def _blender_locale(lang: str | None) -> str:
+    try:
+        import bpy
+        code = (bpy.context.preferences.view.language or "").strip()
+        if code:
+            return code
+    except Exception:
+        pass
+    return {"ZH": "zh_CN", "JA": "ja_JP"}.get(lang or "EN", "en_US")
+
+
+def apply_rna_i18n(lang: str | None = None) -> None:
+    """Write localized RNA names/descriptions (addon language, not Blender UI locale)."""
+    lang = lang or "EN"
+    if not _I18N_CLASSES:
+        return
+    for cls in _I18N_CLASSES:
+        bl_rna = getattr(cls, "bl_rna", None)
+        if bl_rna is None:
+            continue
+        for prop_id, rna_prop in bl_rna.properties.items():
+            cache = (cls.__name__, prop_id)
+            desc_key = _PROP_DESC.get(prop_id)
+            if desc_key:
+                if cache not in _RNA_DESC_EN:
+                    _RNA_DESC_EN[cache] = rna_prop.description or tr("EN", desc_key)
+                text = _RNA_DESC_EN[cache] if lang == "EN" else tr(lang, desc_key)
+                _set_rna_str(rna_prop, "description", text)
+            name_key = _PROP_NAME.get(prop_id)
+            if name_key:
+                if cache not in _RNA_NAME_EN:
+                    _RNA_NAME_EN[cache] = rna_prop.name or tr("EN", name_key)
+                text = _RNA_NAME_EN[cache] if lang == "EN" else tr(lang, name_key)
+                _set_rna_str(rna_prop, "name", text)
+
 
 def sync_descriptions(lang: str | None = None) -> None:
-    """Register Blender UI translations for RNA tooltip strings (Blender 5.x RNA descriptions are read-only)."""
+    """Register Blender UI translations for RNA tooltip strings (fallback path)."""
     try:
         import bpy
     except Exception:
         return
-    trans = {"zh_CN": {}, "ja_JP": {}}
-    for key, entry in TR.items():
-        if not key.startswith("desc_"):
-            continue
-        src = entry.get("EN", "")
-        if not src:
-            continue
-        if entry.get("ZH"):
-            trans["zh_CN"][src] = entry["ZH"]
-        if entry.get("JA"):
-            trans["ja_JP"][src] = entry["JA"]
-    try:
-        bpy.app.translations.unregister(__name__)
-    except Exception:
-        pass
-    try:
-        bpy.app.translations.register(__name__, trans)
-    except Exception:
-        pass
+    lang = lang or "EN"
+    trans: dict[str, dict[tuple[str | None, str], str]] = {}
+    zh_map = _blender_reg_map(_translation_map("ZH"))
+    ja_map = _blender_reg_map(_translation_map("JA"))
+    if zh_map:
+        trans["zh_CN"] = dict(zh_map)
+        trans["zh_HANS"] = dict(zh_map)
+    if ja_map:
+        trans["ja_JP"] = dict(ja_map)
+    if lang == "ZH":
+        trans["en_US"] = dict(zh_map)
+        trans["en"] = dict(zh_map)
+        trans[_blender_locale("ZH")] = dict(zh_map)
+    elif lang == "JA":
+        trans["en_US"] = dict(ja_map)
+        trans["en"] = dict(ja_map)
+        trans[_blender_locale("JA")] = dict(ja_map)
+    pkg = __name__.split(".", 1)[0]
+    for mod in {__name__, pkg}:
+        try:
+            bpy.app.translations.unregister(mod)
+        except Exception:
+            pass
+    for mod in {__name__, pkg}:
+        try:
+            bpy.app.translations.register(mod, trans)
+        except Exception:
+            pass
+
+
+def sync_i18n(lang: str | None = None) -> None:
+    """Sync addon i18n: RNA strings + Blender translation registry."""
+    lang = lang or "EN"
+    sync_descriptions(lang)
+    apply_rna_i18n(lang)
+    apply_operator_i18n(lang)
 
 
 def detect_language() -> str:
@@ -774,6 +1103,42 @@ def mode_items(self, context):
 def color_strategy_items(self, context):
     return _items(self, "color_strategy",
                   (("DEFAULT", "default"), ("VIVID", "vivid"), ("SOFT", "soft")))
+
+
+def ae_mode_items(self, context):
+    return _items(self, "ae_mode", (
+        ("AVERAGE", "average"),
+        ("MEDIAN", "median"),
+        ("P60", "p60"),
+        ("TRIM_MEAN", "trim_mean"),
+        ("LOG_AVERAGE", "log_average"),
+        ("HIGHLIGHT", "highlight"),
+        ("REFERENCE", "reference"),
+    ))
+
+
+def ui_mode_items(self, context):
+    return _items(self, "ui_mode", (
+        ("QUICK", "quick"),
+        ("PRO", "pro"),
+    ))
+
+
+def ae_apply_to_items(self, context):
+    return _items(self, "ae_apply_to", (
+        ("COLOR_MANAGEMENT", "cm"),
+        ("LIGHT_RIG", "lights"),
+    ))
+
+
+def ae_center_preset_items(self, context):
+    return _items(self, "ae_center", (
+        ("FULL", "full"),
+        ("BALANCED", "balanced"),
+        ("CENTER", "center"),
+        ("FRAME", "frame"),
+        ("CUSTOM", "custom"),
+    ))
 
 
 def target_items(self, context):

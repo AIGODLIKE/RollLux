@@ -9,8 +9,36 @@ from bpy.props import IntProperty, StringProperty
 from bpy.types import Operator
 from bpy_extras.io_utils import ImportHelper
 
-from . import clipboard, lighting, overlay, presets
+from . import clipboard, lighting, overlay, presets, translations
 from .translations import tr
+
+
+def _schedule_enum_step(context, prop_id: str, order: tuple[str, ...], direction: int) -> None:
+    """Apply an enum step on the next main-loop tick (safe during icon_view draw)."""
+    settings = context.scene.rolllux
+    try:
+        idx = order.index(getattr(settings, prop_id))
+    except ValueError:
+        idx = 0
+    new_id = order[(idx + direction) % len(order)]
+    scene_name = context.scene.name
+
+    def _apply():
+        try:
+            scene = bpy.data.scenes.get(scene_name)
+            if scene is None:
+                return None
+            current = getattr(scene.rolllux, prop_id)
+            if current != new_id:
+                setattr(scene.rolllux, prop_id, new_id)
+        except Exception:
+            pass
+        return None
+
+    if getattr(bpy.app, "background", False):
+        _apply()
+        return
+    bpy.app.timers.register(_apply, first_interval=0.0)
 
 
 class RLLX_OT_paste_image(Operator):
@@ -150,13 +178,9 @@ class RLLX_OT_preset_step(Operator):
     direction: IntProperty(default=1)
 
     def execute(self, context):
-        s = context.scene.rolllux
-        order = presets.PRESET_ORDER
-        try:
-            i = order.index(s.lighting_preset)
-        except ValueError:
-            i = 0
-        s.lighting_preset = order[(i + self.direction) % len(order)]
+        _schedule_enum_step(
+            context, "lighting_preset", presets.PRESET_ORDER, self.direction,
+        )
         return {"FINISHED"}
 
 
@@ -216,7 +240,7 @@ class RLLX_OT_auto_timer(Operator):
             return {"FINISHED"}
         wm = context.window_manager
         if context.window is None:  # headless: nothing to drive a modal loop
-            self.report({"WARNING"}, "No window for timer")
+            self.report({"WARNING"}, tr(s.language, "err_no_window"))
             return {"CANCELLED"}
         s.auto_timer = True
         self._timer = wm.event_timer_add(s.timer_interval, window=context.window)
@@ -232,8 +256,8 @@ class RLLX_OT_auto_timer(Operator):
         if event.type == "TIMER":
             from . import properties as _props
             _props.ensure_default_reference(context.scene, context)
-            if s.reference_image is not None:
-                lighting.analyze_and_generate(context)
+            if s.reference_image is not None and not lighting.rig_busy():
+                lighting.schedule_analyze_and_generate(context)
         return {"PASS_THROUGH"}
 
     def cancel(self, context):
@@ -255,13 +279,9 @@ class RLLX_OT_reference_step(Operator):
 
     def execute(self, context):
         s = context.scene.rolllux
-        order = presets.reference_order(s)
-        try:
-            i = order.index(s.reference_preset)
-        except ValueError:
-            i = 0
-        s.reference_preset = order[(i + self.direction) % len(order)]
-        overlay.tag_redraw()
+        _schedule_enum_step(
+            context, "reference_preset", presets.reference_order(s), self.direction,
+        )
         return {"FINISHED"}
 
 
@@ -279,6 +299,28 @@ class RLLX_OT_set_rendered(Operator):
             return {"FINISHED"}
         self.report({"WARNING"}, tr(lang, "err_no_view3d"))
         return {"CANCELLED"}
+
+
+class RLLX_OT_bake_ae(Operator):
+    """Apply current auto exposure to render settings or light intensity, then disable AE"""
+    bl_idname = "rolllux.bake_ae"
+    bl_label = "Apply Exposure"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        s = context.scene.rolllux
+        return s.auto_exposure
+
+    def execute(self, context):
+        from . import auto_exposure
+        lang = context.scene.rolllux.language
+        mode = auto_exposure.apply_auto_exposure(context)
+        if mode is None:
+            return {"CANCELLED"}
+        key = "msg_ae_applied_light" if mode == "LIGHT_RIG" else "msg_ae_baked"
+        self.report({"INFO"}, tr(lang, key))
+        return {"FINISHED"}
 
 
 class RLLX_OT_delete_light(Operator):
@@ -310,6 +352,7 @@ _classes = (
     RLLX_OT_reference_step,
     RLLX_OT_random_reference,
     RLLX_OT_set_rendered,
+    RLLX_OT_bake_ae,
     RLLX_OT_delete_light,
 )
 
@@ -317,6 +360,8 @@ _classes = (
 def register():
     for cls in _classes:
         bpy.utils.register_class(cls)
+    translations.register_operators_i18n(*_classes)
+    translations.apply_operator_i18n(translations.detect_language())
 
 
 def unregister():
