@@ -20,7 +20,7 @@
 
 <br>
 
-<img src="./assets/logo.png" alt="RollLux logo" width="120" onerror="this.style.display='none'">
+<img src="./assets/logo.png" alt="RollLux logo" width="420">
 
 </div>
 
