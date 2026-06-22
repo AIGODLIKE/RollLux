@@ -2,7 +2,7 @@
 
 # ✨ RollLux
 
-**参照画像から Blender のライティングをワンクリックで再現**
+**Perceptive Full-Auto Metering Lighting**
 
 *手続き型プリセット · LuxPro 方向 · ビューポート自動露出 · ライブ調整 · オーバーレイ*
 

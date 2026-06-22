@@ -2,7 +2,7 @@
 
 # ✨ RollLux
 
-**一键让 Blender 场景灯光匹配参考图**
+**Perceptive Full-Auto Metering Lighting**
 
 *程序生成预设 · LuxPro 方向 · 视口自动曝光 · 实时调参 · 视口浮层参考*
 

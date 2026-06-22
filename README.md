@@ -2,7 +2,7 @@
 
 # ✨ RollLux
 
-**Match your Blender scene lighting to any reference image — in one click.**
+**Perceptive Full-Auto Metering Lighting**
 
 *Procedural presets · LuxPro direction · viewport auto exposure · live tuning · viewport overlay*
 
