@@ -30,6 +30,22 @@
 
 **RollLux** 是面向 **Blender 5.0+** 的参考图布光插件：分析照片后自动生成可微调灯光组（主光 / 补光 / 轮廓 / 点缀 / 环境），快速复刻电影、人像、产品与风格化打光，无需从零摆灯。
 
+
+
+https://github.com/user-attachments/assets/183dd506-389f-4b7c-b474-8ebf130bed49
+
+
+
+https://github.com/user-attachments/assets/2ef10f8a-98b2-41c1-9983-3c481e25c905
+
+
+
+https://github.com/user-attachments/assets/801ae6c6-3112-40cc-8e00-fa09bf9785eb
+
+
+
+
+
 **所有策略缩略图与分布参考图均由程序自动生成** — 着色球、渐变图、光斑合成，并非固定数量的手工素材库。随时 **随机** 获得新组合，命名策略只是同一套生成管线的不同起点。
 
 导入参考图 → **生成灯光** → 滑块实时微调。支持 **Cycles / Eevee**，**纯离线**，无需 pip 安装。
