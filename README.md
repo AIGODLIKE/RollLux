@@ -30,6 +30,22 @@
 
 **RollLux** is a Blender 5.0+ extension that analyzes a reference photo and builds a **ready-to-tune light rig** — key, fill, rim, accent, and world ambient — so you can replicate cinematic, portrait, product, and stylized looks without hand-placing every light.
 
+
+
+https://github.com/user-attachments/assets/183dd506-389f-4b7c-b474-8ebf130bed49
+
+
+
+https://github.com/user-attachments/assets/2ef10f8a-98b2-41c1-9983-3c481e25c905
+
+
+
+https://github.com/user-attachments/assets/801ae6c6-3112-40cc-8e00-fa09bf9785eb
+
+
+
+
+
 **Every strategy thumbnail and library reference is procedurally generated in code** — shaded spheres, gradient maps, and light blobs — not hand-picked stock photos. Roll **Random** anytime for a fresh combo, or step through named starting points that share the same generative pipeline.
 
 Drop in a reference, hit **Generate**, and refine with real-time sliders. Works with **Cycles** and **Eevee**, fully **offline**, zero pip installs.
