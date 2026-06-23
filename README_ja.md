@@ -138,7 +138,7 @@ https://github.com/user-attachments/assets/801ae6c6-3112-40cc-8e00-fa09bf9785eb
 
 ### インストール
 
-1. [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) から **`rolllux-5.0.0.zip`** をダウンロード。
+1. [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) から **`rolllux-5.5.3.zip`** をダウンロード。
 2. Blender → **編集 → プリファレンス → 拡張機能を取得 → ▼ → ディスクからインストール…**
 3. zip を選択 → **RollLux** を有効化。
 

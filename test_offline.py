@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 import analysis
+import gen_assets
 
 
 def _gradient_image(h, w, bright_x, bright_y, color=(1.0, 0.85, 0.6)):
@@ -103,10 +104,25 @@ def test_dual_gel_detects_accent():
     gel_colors = [key.color, accent.color]
     assert any(c[2] > c[0] + 0.1 for c in gel_colors), gel_colors
     assert any(c[0] > c[2] + 0.1 for c in gel_colors), gel_colors
-    assert key.color[2] > key.color[0], key.color
-    assert accent.color[0] > accent.color[2], accent.color
+    assert key.color[0] > key.color[2], key.color
+    assert accent.color[2] > accent.color[0], accent.color
     print("OK dual gel -> key", tuple(round(c, 2) for c in key.color),
           "accent", tuple(round(c, 2) for c in accent.color))
+
+
+def test_rig_colors_match_lights():
+    prof = analysis.analyze_rgb(_dual_gel_portrait(), mode="PORTRAIT", palette_size=3)
+    rig_cols = analysis.rig_colors_in_order(prof, 3)
+    assert rig_cols[0] == prof.key_color
+    assert rig_cols[1] == prof.accent_color
+    assert rig_cols[2] == prof.rim_color
+    key = next(s for s in prof.specs if s.role == "key")
+    accent = next(s for s in prof.specs if s.role == "accent")
+    rim = next(s for s in prof.specs if s.role == "rim")
+    assert key.color == prof.key_color
+    assert accent.color == prof.accent_color
+    assert rim.color == prof.rim_color
+    print("OK rig colors match lights ->", [tuple(round(c, 2) for c in c) for c in rig_cols])
 
 
 def test_split_portrait_hard_contrast():
@@ -229,9 +245,192 @@ def test_color_strategies():
     default = analysis.sample_palette(img, lum, 4, strategy="DEFAULT")
     vivid = analysis.sample_palette(img, lum, 4, strategy="VIVID")
     soft = analysis.sample_palette(img, lum, 4, strategy="SOFT")
+    distinct = analysis.sample_palette(img, lum, 4, strategy="DISTINCT")
     assert len(default) == 4
+    assert len(distinct) == 4
     assert vivid[0]["color"] != soft[0]["color"]
+    assert _min_hue_separation([p["color"] for p in distinct]) >= 0.10
     print("OK color strategies")
+
+
+def _similar_warm_reference(n=128):
+    """Three close warm blobs plus one cyan patch."""
+    return gen_assets.make_ref(
+        n,
+        base=0.05,
+        tint=(0.5, 0.4, 0.3),
+        blobs=[
+            (-0.5, 0.2, 1.5, 1.0, (1.2, 0.82, 0.30)),
+            (0.0, 0.3, 1.5, 1.0, (1.15, 0.78, 0.28)),
+            (0.5, 0.2, 1.5, 1.0, (1.1, 0.75, 0.25)),
+            (-0.2, -0.4, 1.8, 1.2, (0.15, 0.75, 1.35)),
+        ],
+    ).astype(np.float32)
+
+
+def test_distinct_skips_similar_warm():
+    img = _similar_warm_reference()
+    lum = analysis._luminance(img)
+    vivid = analysis.sample_palette(img, lum, 4, strategy="VIVID")
+    distinct = analysis.sample_palette(img, lum, 4, strategy="DISTINCT")
+    assert len(distinct) >= 2
+
+    def _is_cool(c):
+        return c[2] > c[0] and c[2] > c[1] - 0.05
+
+    assert any(_is_cool(p["color"]) for p in distinct)
+    rounded = [tuple(round(c, 2) for c in p["color"]) for p in distinct]
+    assert len(set(rounded)) >= 2
+    vivid_warm = sum(1 for p in vivid if p["color"][0] >= p["color"][2])
+    distinct_warm = sum(1 for p in distinct if p["color"][0] >= p["color"][2])
+    assert distinct_warm <= vivid_warm
+    if len(distinct) >= 2:
+        assert _min_hue_separation([p["color"] for p in distinct]) >= 0.08
+    print("OK distinct skips similar warm ->", rounded)
+
+
+def test_color_strategy_distinct_i18n():
+    import translations
+    from translations import TR
+
+    for lang, label in (("EN", "Distinct"), ("ZH", "异色分立"), ("JA", "色相分離")):
+        assert TR["color_strategy_distinct"][lang] == label
+        desc = TR["color_strategy_distinct_desc"][lang]
+        assert desc and not desc.startswith("color_strategy_")
+
+    names = [name for _ident, name, _desc in translations.color_strategy_items(None, None)]
+    assert "Distinct" in names
+    print("OK color strategy distinct i18n")
+
+
+def test_distribution_color_mode_i18n():
+    import translations
+    from translations import TR
+
+    for lang, labels in (
+        ("EN", ("Balanced", "Vivid", "Soft")),
+        ("ZH", ("均衡", "极色彩", "柔和")),
+        ("JA", ("均衡", "ビビッド", "ソフト")),
+    ):
+        for suffix, label in zip(("balanced", "vivid", "soft"), labels):
+            key = f"distribution_color_mode_{suffix}"
+            assert TR[key][lang] == label, (lang, key)
+
+    names = [name for _ident, name, _desc in translations.distribution_color_mode_items(None, None)]
+    assert names == ["Balanced", "Vivid", "Soft"], names
+    print("OK distribution color mode i18n")
+
+
+def _tang_style_reference(n=128):
+    """Dark base + separated warm gold left, vermillion right, amber bottom."""
+    gold = (1.2, 0.82, 0.30)
+    verm = (1.3, 0.08, 0.06)
+    amber = (1.0, 0.58, 0.20)
+    silk = (1.0, 0.86, 0.58)
+    deep = (0.88, 0.52, 0.16)
+    return gen_assets.make_ref(
+        n,
+        base=0.03,
+        tint=(0.55, 0.40, 0.28),
+        blobs=[
+            (-0.58, 0.24, 1.55, 1.15, gold),
+            (0.62, 0.18, 1.75, 1.45, verm),
+            (0.0, -0.30, 1.10, 0.75, amber),
+            (0.0, 0.52, 0.92, 0.55, deep),
+            (-0.32, 0.42, 0.75, 0.45, silk),
+        ],
+        vignette=0.28,
+    ).astype(np.float32)
+
+
+def test_tang_palette_not_collapsed():
+    img = _tang_style_reference()
+    pal = analysis.sample_palette(img, analysis._luminance(img), 5, strategy="VIVID")
+    assert len(pal) == 5
+    assert any(
+        c[0] > 0.95 and c[1] < 0.42 and c[2] < 0.22
+        for c in (p["color"] for p in pal)
+    ), [p["color"] for p in pal]
+    rounded = [tuple(round(c, 2) for c in p["color"]) for p in pal]
+    assert len(set(rounded)) >= 4, rounded
+    print("OK tang palette ->", rounded)
+
+
+def test_rig_colors_use_palette_per_light():
+    img = _tang_style_reference()
+    prof = analysis.analyze_rgb(img, mode="PORTRAIT", palette_size=5, color_strategy="VIVID")
+    rig = analysis.rig_colors_in_order(prof, 5)
+    pal_cols = [tuple(round(c, 2) for c in p["color"]) for p in prof.palette]
+    rig_round = [tuple(round(c, 2) for c in c) for c in rig]
+    assert rig_round == pal_cols[:5]
+    assert len(set(rig_round)) >= 4, rig_round
+    role_triple = {
+        tuple(round(c, 2) for c in prof.key_color),
+        tuple(round(c, 2) for c in prof.fill_color),
+        tuple(round(c, 2) for c in prof.rim_color),
+    }
+    assert len(set(rig_round)) > len(role_triple), (rig_round, role_triple)
+    print("OK rig palette per light ->", rig_round)
+
+
+def _rgb_hue(rgb):
+    r, g, b = (float(rgb[0]), float(rgb[1]), float(rgb[2]))
+    mx, mn = max(r, g, b), min(r, g, b)
+    if mx - mn < 1e-6:
+        return 0.0
+    d = mx - mn
+    if mx == r:
+        h = (g - b) / d + (6.0 if g < b else 0.0)
+    elif mx == g:
+        h = (b - r) / d + 2.0
+    else:
+        h = (r - g) / d + 4.0
+    return (h / 6.0) % 1.0
+
+
+def _min_hue_separation(colors):
+    hues = [_rgb_hue(c) for c in colors]
+    if len(hues) < 2:
+        return 1.0
+    best = 1.0
+    for i, h0 in enumerate(hues):
+        for h1 in hues[i + 1:]:
+            d = abs(h0 - h1)
+            best = min(best, d, 1.0 - d)
+    return best
+
+
+def _color_chroma(rgb):
+    r, g, b = (float(rgb[0]), float(rgb[1]), float(rgb[2]))
+    return max(r, g, b) - min(r, g, b)
+
+
+def test_distribution_color_modes():
+    import random
+    from gen_assets import build_random_reference_params, make_ref
+
+    for seed in range(24):
+        rng = random.Random(seed)
+        vivid = build_random_reference_params("VIVID", rng)
+        blob_cols = [b[4] for b in vivid["blobs"]]
+        assert len(blob_cols) >= 3
+        assert vivid["base"] <= 0.12
+        assert _min_hue_separation(blob_cols) >= 0.12
+
+    for seed in range(24):
+        rng = random.Random(seed)
+        soft = build_random_reference_params("SOFT", rng)
+        assert soft["base"] >= 0.28
+        assert len(soft["blobs"]) <= 2
+        for col in [b[4] for b in soft["blobs"]] + [soft["tint"]]:
+            assert _color_chroma(col) <= 0.12
+
+    rng = random.Random(7)
+    lin = make_ref(128, **build_random_reference_params("VIVID", rng))
+    pal = analysis.sample_palette(lin, analysis._luminance(lin), 5, strategy="VIVID")
+    rounded = [tuple(round(c, 2) for c in p["color"]) for p in pal]
+    assert len(set(rounded)) >= 3, rounded
+    print("OK distribution color modes ->", rounded)
 
 
 def test_palette_tracks_count():
@@ -302,29 +501,22 @@ def test_auto_exposure_metering():
 
 def test_ae_enum_i18n():
     import translations
+    from translations import TR
 
-    class _S:
-        language = "ZH"
-
-    s = _S()
-    for ident, name, desc in translations.ae_apply_to_items(s, None):
+    for ident, name, desc in translations.ae_apply_to_items(None, None):
         assert not name.startswith("ae_"), name
-        assert name in ("色彩管理", "灯光组"), name
-    for ident, name, desc in translations.ae_center_preset_items(s, None):
+        assert name in ("Color Management", "Light Rig"), name
+    for ident, name, desc in translations.ae_center_preset_items(None, None):
         assert not name.startswith("ae_"), name
-    assert translations.tr("ZH", "ae_center_balanced") == "均衡"
+    assert TR["ae_center_balanced"]["EN"] == "Balanced"
     print("OK ae enum i18n")
 
 
 def test_ui_mode_i18n():
     import translations
 
-    class _S:
-        language = "ZH"
-
-    s = _S()
-    names = [name for _id, name, _d in translations.ui_mode_items(s, None)]
-    assert "快速" in names and "专业" in names
+    names = [name for _id, name, _d in translations.ui_mode_items(None, None)]
+    assert "Quick" in names and "Pro" in names
     print("OK ui mode i18n")
 
 
@@ -345,18 +537,16 @@ def test_i18n_completeness():
     root = os.path.dirname(__file__)
     for fn in ("ui.py", "operators.py"):
         text = open(os.path.join(root, fn), encoding="utf-8").read()
-        ui_keys.update(re.findall(r"""tr\(lang,\s*['\"]([a-zA-Z0-9_]+)['\"]""", text))
+        ui_keys.update(re.findall(r"""tr\(\s*['\"]([a-zA-Z0-9_]+)['\"]""", text))
     for key in ui_keys:
         assert key in TR, f"missing UI key {key!r}"
 
     for bl_id, tr_key in _OPERATOR_LABELS.items():
         assert tr_key in TR, f"operator {bl_id} -> {tr_key}"
 
-    class _S:
-        language = "ZH"
-
-    for ident, name, _desc in translations.ui_mode_items(_S(), None):
-        assert name in ("快速", "专业"), name
+    for ident, name, _desc in translations.ui_mode_items(None, None):
+        assert name in ("Quick", "Pro"), name
+    assert TR["ui_mode_quick"]["ZH"] and TR["ui_mode_pro"]["ZH"]
     print("OK i18n completeness")
 
 
@@ -373,6 +563,7 @@ def test_blender_reg_map():
 
 if __name__ == "__main__":
     test_dual_gel_detects_accent()
+    test_rig_colors_match_lights()
     test_split_portrait_hard_contrast()
     test_direction_left_vs_right()
     test_portrait_direction_left_vs_right()
@@ -385,6 +576,12 @@ if __name__ == "__main__":
     test_luxpro_backlight()
     test_palette_distinct_colors()
     test_color_strategies()
+    test_distinct_skips_similar_warm()
+    test_color_strategy_distinct_i18n()
+    test_distribution_color_mode_i18n()
+    test_tang_palette_not_collapsed()
+    test_rig_colors_use_palette_per_light()
+    test_distribution_color_modes()
     test_palette_tracks_count()
     test_exposure_factor()
     test_auto_exposure_metering()

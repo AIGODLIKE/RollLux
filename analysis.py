@@ -99,7 +99,36 @@ def _safe_mean_color(rgb_flat: np.ndarray) -> np.ndarray:
 
 
 # Global color-sampling strategies (applied to palette + key/fill/ambient).
-COLOR_STRATEGIES = ("DEFAULT", "VIVID", "SOFT")
+COLOR_STRATEGIES = ("DEFAULT", "VIVID", "SOFT", "DISTINCT")
+
+
+def _sampling_hue_min_sep(strategy: str) -> float:
+    """Minimum hue wheel separation when deduplicating swatches."""
+    return 0.12 if strategy == "DISTINCT" else 0.08
+
+
+def _colors_too_similar(c1, c2, strategy: str = "DEFAULT") -> bool:
+    """True when two linear RGB colors are too close for the sampling strategy."""
+    h1, h2 = _rgb_hue(c1), _rgb_hue(c2)
+    if strategy == "DISTINCT":
+        min_sep = _sampling_hue_min_sep(strategy)
+        if h1 >= 0.0 and h2 >= 0.0:
+            sep = _hue_distance(h1, h2)
+            if sep < min_sep:
+                return True
+            d = float(np.linalg.norm(np.asarray(c1, dtype=np.float32) - np.asarray(c2, dtype=np.float32)))
+            if d < 0.22 and sep < 0.20:
+                return True
+        else:
+            d = float(np.linalg.norm(np.asarray(c1, dtype=np.float32) - np.asarray(c2, dtype=np.float32)))
+            if d < 0.18:
+                return True
+        return False
+    if h1 >= 0.0 and h2 >= 0.0:
+        sep = _hue_distance(h1, h2)
+        if sep < 0.028 and abs(_chroma_of(c1) - _chroma_of(c2)) < 0.05:
+            return True
+    return False
 
 
 def _normalize_color(color: np.ndarray) -> tuple:
@@ -119,9 +148,15 @@ def apply_color_strategy(color, strategy: str = "DEFAULT") -> tuple:
     r, g, b = (float(color[0]), float(color[1]), float(color[2]))
     lum = float(_LUMA @ np.array([r, g, b], dtype=np.float32))
     if strategy == "VIVID":
-        sat = 1.65
+        sat = 2.0
         out = np.array([lum + (c - lum) * sat for c in (r, g, b)], dtype=np.float32)
-        return _normalize_color(np.clip(out, 0.0, None))
+        out = np.clip(out, 0.0, None)
+        return _normalize_color(out)
+    if strategy == "DISTINCT":
+        sat = 1.35
+        out = np.array([lum + (c - lum) * sat for c in (r, g, b)], dtype=np.float32)
+        out = np.clip(out, 0.0, None)
+        return _normalize_color(out)
     # SOFT — pull saturation down and lean toward a neutral warm gray.
     sat = 0.42
     neutral = np.array([0.93, 0.91, 0.89], dtype=np.float32)
@@ -438,6 +473,16 @@ def _chroma_of(color) -> float:
     return float((peak - c.min()) / peak)
 
 
+def _peak_saturated_rgb(flat: np.ndarray, fl: np.ndarray, sat: np.ndarray,
+                        mask: np.ndarray) -> np.ndarray:
+    """Pick the most vivid pixel in ``mask``, not the cluster average (which greys out)."""
+    if not mask.any():
+        return flat.mean(0)
+    scores = fl[mask] * (sat[mask] + 0.08) * np.max(flat[mask], axis=1)
+    pick = int(np.argmax(scores))
+    return flat[mask][pick].copy()
+
+
 def _rgb_hue(color) -> float:
     """Hue in 0..1 (HSV), undefined greys -> -1."""
     r, g, b = (float(color[0]), float(color[1]), float(color[2]))
@@ -463,7 +508,11 @@ def _hue_distance(a: float, b: float) -> float:
 
 def _distinct_hue_entries(entries: list, min_sep: float = 0.08) -> list:
     """Keep the strongest clusters that are hue-distinct (for gel / dual-tone)."""
-    ranked = sorted(entries, key=lambda e: e["weight"], reverse=True)
+    ranked = sorted(
+        entries,
+        key=lambda e: e["weight"] * (_chroma_of(e["color"]) + 0.25),
+        reverse=True,
+    )
     kept: list = []
     for entry in ranked:
         h = _rgb_hue(entry["color"])
@@ -479,16 +528,17 @@ def _distinct_hue_entries(entries: list, min_sep: float = 0.08) -> list:
 
 
 def _assign_gel_roles(palette: list, key_screen_pos: tuple | None = None) -> tuple:
-    """Primary gel (key) vs secondary (accent) by cluster weight; return positions."""
+    """Primary gel (key) vs secondary (accent); left screen position = key."""
     distinct = _top_distinct_palette(palette, 2)
     if len(distinct) < 2:
         c = palette[0]["color"]
         p = palette[0]["pos"]
         return c, c, p, p
-    if distinct[0]["weight"] >= distinct[1]["weight"]:
-        key_e, accent_e = distinct[0], distinct[1]
+    a, b = distinct[0], distinct[1]
+    if a["pos"][0] <= b["pos"][0]:
+        key_e, accent_e = a, b
     else:
-        key_e, accent_e = distinct[1], distinct[0]
+        key_e, accent_e = b, a
     return key_e["color"], accent_e["color"], key_e["pos"], accent_e["pos"]
 
 
@@ -503,6 +553,193 @@ def _is_dual_tone(palette: list) -> bool:
     if h0 < 0.0 or h1 < 0.0:
         return False
     return _hue_distance(h0, h1) >= 0.08
+
+
+def rig_colors_in_order(profile, count: int) -> list[tuple]:
+    """Light colors in rig priority order: key, fill/accent, rim, then extras.
+
+    Matches the generated light list so analysis swatches align with each lamp.
+    When the sampled palette already has ``count`` entries, use it directly so
+    each swatch maps to one rig light (avoids key/fill/rim collapsing to one hue).
+    """
+    count = max(1, int(count))
+    palette = profile.palette or []
+    if len(palette) >= count:
+        return [tuple(entry["color"]) for entry in palette[:count]]
+
+    colors: list[tuple] = [profile.key_color]
+    if getattr(profile, "dual_tone", False):
+        colors.append(getattr(profile, "accent_color", profile.fill_color))
+    else:
+        colors.append(profile.fill_color)
+    colors.append(profile.rim_color)
+
+    def _key(c):
+        return tuple(round(float(v), 3) for v in c)
+
+    used = {_key(c) for c in colors}
+    for entry in palette:
+        ck = _key(entry["color"])
+        if ck in used:
+            continue
+        colors.append(entry["color"])
+        used.add(ck)
+        if len(colors) >= count:
+            break
+
+    while len(colors) < count and palette:
+        colors.append(palette[(len(colors) - 1) % len(palette)]["color"])
+    return colors[:count]
+
+
+def _sample_peak_swatches(flat: np.ndarray, fl: np.ndarray, sat: np.ndarray,
+                          fx: np.ndarray, fy: np.ndarray, w: int, h: int,
+                          k: int, strategy: str, active: np.ndarray) -> list:
+    """Pick the k most vivid, hue-distinct pixels (matches graphic distribution maps)."""
+    nx_all = (fx / max(w - 1, 1)) * 2.0 - 1.0
+    ny_all = 1.0 - (fy / max(h - 1, 1)) * 2.0
+    scores = fl * (sat + 0.08) * np.maximum(flat.max(axis=1), 0.01)
+    scores = np.where(active, scores, -1.0)
+    entries: list = []
+
+    def _same_region(px: float, py: float, qx: float, qy: float, margin: float = 0.38) -> bool:
+        return abs(px - qx) < margin and abs(py - qy) < margin
+
+    def _too_similar(col, hue: float, nx: float, ny: float) -> bool:
+        if strategy == "DISTINCT":
+            applied = apply_color_strategy(col, strategy)
+            return any(_colors_too_similar(applied, e["color"], strategy) for e in entries)
+        min_sep = 0.045 if len(entries) < k else 0.07
+        for e in entries:
+            h2 = _rgb_hue(e["color"])
+            sep = _hue_distance(hue, h2) if hue >= 0.0 and h2 >= 0.0 else 0.0
+            ex, ey = e["pos"]
+            if _same_region(nx, ny, ex, ey) and sep < min_sep:
+                return True
+            if sep < 0.028 and abs(_chroma_of(col) - _chroma_of(e["color"])) < 0.05:
+                return True
+        return False
+
+    def _try_add(idx: int) -> bool:
+        if idx < 0 or scores[idx] < 0.0:
+            return False
+        col = flat[idx]
+        min_chroma = 0.08 if len(entries) < k else 0.10
+        if _chroma_of(col) < min_chroma:
+            return False
+        hue = _rgb_hue(col)
+        cx, cy = float(fx[idx]), float(fy[idx])
+        nx = (cx / max(w - 1, 1)) * 2.0 - 1.0
+        ny = 1.0 - (cy / max(h - 1, 1)) * 2.0
+        if _too_similar(col, hue, nx, ny):
+            return False
+        entries.append({
+            "color": apply_color_strategy(col, strategy),
+            "lum": float(fl[idx]),
+            "pos": (float(np.clip(nx, -1, 1)), float(np.clip(ny, -1, 1))),
+            "weight": float(scores[idx]),
+        })
+        return True
+
+    chroma = (flat.max(axis=1) - flat.min(axis=1)) / (flat.max(axis=1) + 1e-6)
+    vivid = scores * (chroma + 0.35)
+
+    region_pick = vivid * (chroma + 0.30)
+    region_masks = (
+        active & (nx_all < -0.18),
+        active & (nx_all > 0.18),
+        active & (ny_all > 0.18),
+        active & (ny_all < -0.18),
+        active & (np.abs(nx_all) <= 0.22) & (np.abs(ny_all) <= 0.22),
+    )
+    if k >= 4:
+        for region_mask in region_masks:
+            if len(entries) >= k:
+                break
+            if region_mask.any():
+                idx = int(np.argmax(np.where(region_mask, region_pick, -1.0)))
+                _try_add(idx)
+    elif 2 <= k <= 3:
+        for side_mask in (region_masks[0], region_masks[1]):
+            if side_mask.any():
+                idx = int(np.argmax(np.where(side_mask, region_pick, -1.0)))
+                _try_add(idx)
+    elif scores.max() > 0:
+        _try_add(int(np.argmax(scores)))
+
+    if strategy == "DISTINCT" and len(entries) < k:
+        hues_arr = np.array([_rgb_hue(c) for c in flat], dtype=np.float32)
+        wedges = np.linspace(0.0, 1.0, k + 1)
+        for i in range(k):
+            if len(entries) >= k:
+                break
+            lo, hi = float(wedges[i]), float(wedges[i + 1])
+            if i < k - 1:
+                in_w = active & (hues_arr >= lo) & (hues_arr < hi) & (hues_arr >= 0.0)
+            else:
+                in_w = active & ((hues_arr >= lo) | (hues_arr < wedges[1] * 0.5)) & (hues_arr >= 0.0)
+            if not in_w.any():
+                continue
+            idx = int(np.argmax(np.where(in_w, region_pick, -1.0)))
+            _try_add(idx)
+
+    order = np.argsort(-scores)
+    for idx in order:
+        if len(entries) >= k:
+            break
+        _try_add(int(idx))
+
+    return entries
+
+
+def _supplement_distinct_palette(existing: list, k: int, strategy: str,
+                                 flat: np.ndarray, fl: np.ndarray, sat: np.ndarray,
+                                 fx: np.ndarray, fy: np.ndarray,
+                                 w: int, h: int, active: np.ndarray) -> list:
+    """Add vivid pixels that remain hue-distinct from ``existing``."""
+    scores = fl * (sat + 0.08) * np.maximum(flat.max(axis=1), 0.01)
+    scores = np.where(active, scores, -1.0)
+    entries = list(existing)
+    for idx in np.argsort(-scores):
+        if len(entries) >= k:
+            break
+        idx = int(idx)
+        if scores[idx] < 0.0:
+            continue
+        col = flat[idx]
+        if _chroma_of(col) < 0.08:
+            continue
+        applied = apply_color_strategy(col, strategy)
+        if any(_colors_too_similar(applied, e["color"], strategy) for e in entries):
+            continue
+        cx, cy = float(fx[idx]), float(fy[idx])
+        nx = (cx / max(w - 1, 1)) * 2.0 - 1.0
+        ny = 1.0 - (cy / max(h - 1, 1)) * 2.0
+        entries.append({
+            "color": applied,
+            "lum": float(fl[idx]),
+            "pos": (float(np.clip(nx, -1, 1)), float(np.clip(ny, -1, 1))),
+            "weight": float(scores[idx]),
+        })
+    return entries[:k]
+
+
+def _finalize_palette(entries: list, k: int, strategy: str, *,
+                      flat: np.ndarray | None = None, fl: np.ndarray | None = None,
+                      sat: np.ndarray | None = None, fx: np.ndarray | None = None,
+                      fy: np.ndarray | None = None, w: int = 0, h: int = 0,
+                      active: np.ndarray | None = None) -> list:
+    """Post-filter palette entries; DISTINCT enforces hue separation."""
+    k = int(max(1, k))
+    if strategy != "DISTINCT":
+        return entries[:k] if len(entries) >= k else entries
+    min_sep = _sampling_hue_min_sep(strategy)
+    distinct = _distinct_hue_entries(entries, min_sep=min_sep)
+    if len(distinct) >= k:
+        return distinct[:k]
+    if flat is None or fl is None or sat is None or fx is None or fy is None or active is None:
+        return distinct
+    return _supplement_distinct_palette(distinct, k, strategy, flat, fl, sat, fx, fy, w, h, active)
 
 
 def sample_palette(rgb: np.ndarray, lum: np.ndarray, k: int,
@@ -529,11 +766,17 @@ def sample_palette(rgb: np.ndarray, lum: np.ndarray, k: int,
     peak = flat.max(axis=1)
     sat = (peak - flat.min(axis=1)) / (peak + 1e-6)
     p30 = float(np.percentile(fl[mask], 30)) if mask.any() else 0.08
-    active = mask & (sat > 0.10) & (fl > p30)
+    active = mask & (sat > 0.18) & (fl > p30)
     if int(active.sum()) < 48:
+        active = mask & (sat > 0.12) & (fl > p30)
+    if int(active.sum()) < 16:
         active = mask & (fl > p30)
     if int(active.sum()) < 16:
         active = np.ones(n, dtype=bool)
+
+    peak_entries = _sample_peak_swatches(flat, fl, sat, fx, fy, w, h, k, strategy, active)
+    if strategy != "DISTINCT" and len(peak_entries) >= k:
+        return peak_entries[:k]
 
     sflat = flat[active]
     sfl = fl[active]
@@ -590,7 +833,7 @@ def sample_palette(rgb: np.ndarray, lum: np.ndarray, k: int,
         cy = float(sfy[m].mean())
         nx = (cx / max(w - 1, 1)) * 2.0 - 1.0
         ny = 1.0 - (cy / max(h - 1, 1)) * 2.0
-        raw = sflat[m].mean(0)
+        raw = _peak_saturated_rgb(sflat, sfl, ssat, m)
         entries.append({
             "color": apply_color_strategy(raw, strategy),
             "lum": lj,
@@ -598,8 +841,18 @@ def sample_palette(rgb: np.ndarray, lum: np.ndarray, k: int,
             "weight": cnt * lj * float(ssat[m].mean() + 0.2),
         })
     entries.sort(key=lambda e: (e["lum"], e["weight"]), reverse=True)
-    if len(entries) >= k:
-        return entries
+    if strategy == "DISTINCT" and peak_entries:
+        entries = list(peak_entries) + entries
+    if strategy == "DISTINCT":
+        if len(entries) >= k:
+            finalized = _finalize_palette(
+                entries, k, strategy,
+                flat=flat, fl=fl, sat=sat, fx=fx, fy=fy, w=w, h=h, active=active,
+            )
+            if len(finalized) >= k:
+                return finalized[:k]
+    elif len(entries) >= k:
+        return entries[:k]
 
     # Fallback: full-frame k-means (flat graphic / multi-patch references).
     order = np.argsort(fl)
@@ -622,14 +875,20 @@ def sample_palette(rgb: np.ndarray, lum: np.ndarray, k: int,
         cy = float(fy[m].mean())
         nx = (cx / max(w - 1, 1)) * 2.0 - 1.0
         ny = 1.0 - (cy / max(h - 1, 1)) * 2.0
+        raw = _peak_saturated_rgb(flat, fl, sat, m)
         entries.append({
-            "color": apply_color_strategy(flat[m].mean(0), strategy),
+            "color": apply_color_strategy(raw, strategy),
             "lum": lj,
             "pos": (float(np.clip(nx, -1, 1)), float(np.clip(ny, -1, 1))),
             "weight": float(m.sum()) * lj,
         })
     entries.sort(key=lambda e: (e["lum"], e["weight"]), reverse=True)
-    return entries
+    if strategy == "DISTINCT" and peak_entries:
+        entries = list(peak_entries) + entries
+    return _finalize_palette(
+        entries, k, strategy,
+        flat=flat, fl=fl, sat=sat, fx=fx, fy=fy, w=w, h=h, active=active,
+    )
 
 
 def _top_distinct_palette(palette: list, n: int = 2) -> list:
@@ -740,18 +999,21 @@ def analyze_rgb(rgb: np.ndarray, mode: str = "AUTO",
     profile.palette = sample_palette(rgb, lum, k, strategy=color_strategy)
     profile.dual_tone = _is_dual_tone(profile.palette)
     if profile.palette:
-        profile.key_color = profile.palette[0]["color"]
-        if profile.dual_tone and len(profile.palette) > 1:
+        distinct = _top_distinct_palette(profile.palette, min(3, len(profile.palette)))
+        if profile.dual_tone and len(distinct) >= 2:
             kc, ac, kp, ap = _assign_gel_roles(profile.palette)
             profile.key_color = kc
             profile.accent_color = ac
             profile.key_screen_pos = kp
             profile.accent_pos = ap
             profile.fill_color = ac
-            profile.rim_color = profile.palette[min(2, len(profile.palette) - 1)]["color"]
+            profile.rim_color = ac if len(distinct) < 3 else distinct[2]["color"]
         elif len(profile.palette) > 1:
+            profile.key_color = profile.palette[0]["color"]
             profile.fill_color = profile.palette[1]["color"]
             profile.rim_color = profile.palette[min(2, len(profile.palette) - 1)]["color"]
+        else:
+            profile.key_color = profile.palette[0]["color"]
         profile.ambient_color = profile.palette[-1]["color"]
     profile.specs = build_specs(profile, mode)
     return profile
@@ -839,8 +1101,7 @@ def build_specs(profile: LightingProfile, mode: str) -> list:
         specs.append(LightSpec(
             role="rim", light_type="SPOT",
             direction=rim_dir,
-            color=profile.rim_color if not profile.dual_tone else profile.key_color,
-            energy=rim_energy * (0.75 if profile.dual_tone else 1.0),
+            color=profile.rim_color, energy=rim_energy * (0.75 if profile.dual_tone else 1.0),
             size=max(0.18, 0.32 - hard * 0.08),
         ))
     else:  # SCENE — broad, even, environment-first (no rim).
@@ -906,28 +1167,3 @@ def image_to_rgb(image) -> np.ndarray:
     if step > 1:
         arr = arr[::step, ::step, :]
     return np.ascontiguousarray(arr)
-
-
-# --------------------------------------------------------------------------- #
-# Headless self-test
-# --------------------------------------------------------------------------- #
-if __name__ == "__main__":
-    # Synthetic: warm light entering from the top-right.
-    H, W = 120, 160
-    yy, xx = np.mgrid[0:H, 0:W]
-    grad = ((xx / W) * 0.7 + (1.0 - yy / H) * 0.7)
-    test = np.stack([grad * 1.0, grad * 0.8, grad * 0.55], axis=-1).astype(np.float32)
-
-    prof = analyze_rgb(test, mode="PORTRAIT")
-    print("key_color        :", tuple(round(c, 3) for c in prof.key_color))
-    print("fill_color       :", tuple(round(c, 3) for c in prof.fill_color))
-    print("ambient_color    :", tuple(round(c, 3) for c in prof.ambient_color))
-    print("mean_luminance   :", round(prof.mean_luminance, 3))
-    print("contrast_ratio   :", round(prof.contrast_ratio, 2))
-    print("key_screen_pos   :", tuple(round(c, 2) for c in prof.key_screen_pos))
-    print("color_temperature:", round(prof.color_temperature), "K  warmth", round(prof.warmth, 2))
-    print("mood             :", prof.mood, "| outdoor:", prof.is_outdoor)
-    print("specs            :", [(s.role, s.light_type) for s in prof.specs])
-    assert prof.key_screen_pos[0] > 0 and prof.key_screen_pos[1] > 0, "expected top-right key"
-    assert prof.warmth > 0.5, "expected warm light"
-    print("\nself-test OK")

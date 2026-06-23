@@ -14,7 +14,7 @@ bl_info = {
     "name": "RollLux",
     "description": "Roll random lighting from reference images with one click.",
     "author": "ACGGIT",
-    "version": (5, 0, 0),
+    "version": (5, 5, 3),
     "blender": (5, 0, 0),
     "location": "Tool Panel",
     "support": "COMMUNITY",
@@ -22,26 +22,26 @@ bl_info = {
 }
 
 if __package__:
-    from . import presets, overlay, properties, operators, ui
+    from . import presets, overlay, properties, operators, ui, mcp_bridge, translations
 else:  # pragma: no cover - fallback when run as a loose script
     import presets
     import overlay
     import properties
     import operators
     import ui
+    import mcp_bridge
+    import translations
 
-_modules = (presets, overlay, properties, operators, ui)
+_modules = (presets, overlay, properties, operators, mcp_bridge, ui)
 
 
 def register():
     for mod in _modules:
         mod.register()
+    translations.register()
 
 
 def unregister():
+    translations.unregister()
     for mod in reversed(_modules):
         mod.unregister()
-
-
-if __name__ == "__main__":
-    register()

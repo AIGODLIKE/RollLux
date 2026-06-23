@@ -28,8 +28,8 @@ INCLUDE = (
     "translations.py",
     "presets.py",
     "overlay.py",
-    "clipboard.py",
     "gen_assets.py",
+    "mcp_bridge.py",
     "README.md",
 )
 

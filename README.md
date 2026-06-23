@@ -76,8 +76,8 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 | 💡 **1–8 lights** | Hue-diverse k-means palette matched to light count |
 | 🔧 **Per-light edit** | Toggle, recolor, energy, softness, delete |
 | 🪟 **Floating overlay** | Pin reference in viewport (opacity, scale, corner) |
-| 📋 **Clipboard paste** | Paste reference image from system clipboard |
-| 🌐 **Trilingual UI** | English / 中文 / 日本語 |
+| 📂 **Open image** | Load a reference image from disk |
+| 🌐 **Localized UI** | English / 中文 / 日本語 via Blender language preferences |
 
 <details>
 <summary><b>📊 RollLux vs manual lighting setup</b></summary>
@@ -138,7 +138,7 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 
 ### Install
 
-1. Download **`rolllux-5.0.0.zip`** from [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest).
+1. Download **`rolllux-5.5.3.zip`** from [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest).
 2. Blender → **Edit → Preferences → Get Extensions → ▼ → Install from Disk…**
 3. Select the zip → enable **RollLux**.
 
@@ -156,7 +156,7 @@ py build.py         # -> ../dist/rolllux-<version>.zip
 ### Basic workflow
 
 1. **3D Viewport** → **N** → **RollLux** tab.
-2. Load or paste a **reference image** (a procedurally generated default is applied on first open).
+2. Load a **reference image** (a procedurally generated default is applied on first open).
 3. Pick a **Strategy** preset or tap **🔄 Random** for a freshly generated style.
 4. Optionally change **Lighting Distribution** (procedural library) or use your own photo.
 5. Select your subject → **Generate Lighting**.
@@ -275,7 +275,7 @@ In camera view without **Subject Frame**, the plugin can also crop to the **came
 
 | Control | Description |
 |:--|:--|
-| Reference image | File browser, paste, or procedural library |
+| Reference image | File browser or procedural library |
 | Strategy | **Procedurally generated** style presets + **Random** (new thumbnail each roll) |
 | Lighting Distribution | **Procedurally generated** reference images + **Random** |
 | Generate / Analyze / Clear | Build rig · analyze only · remove rig |

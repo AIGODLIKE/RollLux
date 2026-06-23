@@ -152,7 +152,35 @@ def list_lights():
     coll = bpy.data.collections.get(COLLECTION_NAME)
     if coll is None:
         return []
-    return [o for o in coll.objects if o.type == "LIGHT" and o.rolllux_light.is_rllx]
+    lights = [o for o in coll.objects if o.type == "LIGHT" and o.rolllux_light.is_rllx]
+    priority = {"key": 0, "accent": 1, "fill": 1, "rim": 2, "sky": 3, "extra": 4}
+    lights.sort(key=lambda o: priority.get(o.rolllux_light.role, 5))
+    return lights
+
+
+def capture_colors_to_result(scene):
+    """Copy current rig light colors into ``rolllux_result.sampled_colors``."""
+    res = scene.rolllux_result
+    colors = [tuple(o.rolllux_light.base_color) for o in list_lights()]
+    if not colors:
+        return
+    res.sampled_colors.clear()
+    for color in colors:
+        item = res.sampled_colors.add()
+        item.color = color
+    res.valid = True
+
+
+def _locked_palette(scene):
+    """Palette to keep when ``lock_light_colors`` is enabled."""
+    s = scene.rolllux
+    if not s.lock_light_colors:
+        return None
+    res = scene.rolllux_result
+    if res.valid and res.sampled_colors:
+        return [tuple(item.color) for item in res.sampled_colors]
+    colors = [tuple(o.rolllux_light.base_color) for o in list_lights()]
+    return colors or None
 
 
 def clear_previous(context):
@@ -283,7 +311,7 @@ def _apply_light(obj, settings, target, radius, basis):
 
     ld = obj.data
     energy = _energy_scale(settings) * info.e0 * info.gain
-    if info.is_sun:
+    if info.is_sun and ld.type == "SUN":
         ld.energy = energy * _SUN_BASE
         ld.angle = max(0.0017, info.softness * 0.06)
     else:
@@ -458,20 +486,28 @@ def store_result(scene, profile):
     s = scene.rolllux
     res = scene.rolllux_result
     count = max(1, int(s.light_count))
-    palette = profile.palette or []
     res.valid = True
     res.key_color = profile.key_color
     res.fill_color = profile.fill_color
     res.ambient_color = tuple(min(c, 1.0) for c in profile.ambient_color)
+    preserved = None
+    if s.lock_light_colors and res.sampled_colors:
+        preserved = [tuple(item.color) for item in res.sampled_colors]
     res.sampled_colors.clear()
-    for i in range(count):
-        item = res.sampled_colors.add()
-        if i < len(palette):
-            item.color = palette[i]["color"]
-        elif palette:
-            item.color = palette[-1]["color"]
-        else:
-            item.color = (profile.key_color, profile.fill_color, profile.ambient_color)[min(i, 2)]
+    rig_colors = analysis.rig_colors_in_order(profile, count)
+    if preserved:
+        for i in range(count):
+            item = res.sampled_colors.add()
+            if i < len(preserved):
+                item.color = preserved[i]
+            elif preserved:
+                item.color = preserved[-1]
+            else:
+                item.color = rig_colors[i] if i < len(rig_colors) else profile.key_color
+    else:
+        for i in range(count):
+            item = res.sampled_colors.add()
+            item.color = rig_colors[i] if i < len(rig_colors) else profile.key_color
     res.mean_luminance = profile.mean_luminance
     res.contrast_ratio = profile.contrast_ratio
     res.color_temperature = profile.color_temperature
@@ -542,7 +578,10 @@ def analyze_and_generate(context):
             return None, err
         s = context.scene.rolllux
         specs = presets.apply_preset(profile, s.lighting_preset, s.mode)
-        specs = presets.fit_to_count(specs, s.light_count, profile, s.color_strategy)
+        specs = presets.fit_to_count(
+            specs, s.light_count, profile, s.color_strategy,
+            locked_colors=_locked_palette(context.scene),
+        )
         summary = generate(context, profile, s, specs=specs)
         return summary, None
     finally:

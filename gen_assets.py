@@ -258,6 +258,126 @@ _GRN = (0.45, 0.95, 0.5)
 _FIRE = (1.0, 0.5, 0.2)
 _TEAL = (0.2, 0.72, 0.72)
 
+DISTRIBUTION_COLOR_MODES = ("BALANCED", "VIVID", "SOFT")
+
+_BALANCED_GEL = [
+    _W, _W2, _N, _C, _MAG, _CYAN, _PINK, _BLU, _GRN, _FIRE,
+]
+
+_VIVID_GEL = [
+    (1.4, 0.12, 0.85),
+    (0.15, 0.75, 1.35),
+    (1.35, 0.55, 0.05),
+    (0.25, 1.05, 0.35),
+    (0.75, 0.25, 1.35),
+]
+_VIVID_SLOTS = [
+    (-0.62, 0.18),
+    (0.62, 0.18),
+    (0.0, 0.58),
+    (-0.38, -0.42),
+    (0.38, -0.42),
+]
+
+_SOFT_GEL = [
+    (1.0, 0.96, 0.92),
+    (0.94, 0.96, 1.0),
+    (0.98, 0.95, 0.90),
+]
+_SOFT_TINTS = [
+    (0.97, 0.95, 0.92),
+    (0.93, 0.95, 0.98),
+]
+
+
+def build_random_reference_params(mode: str = "BALANCED", rng=None) -> dict:
+    """Build ``make_ref`` kwargs for a procedural lighting-distribution image.
+
+    * ``BALANCED`` — mixed warm/cool blobs (legacy random reference).
+    * ``VIVID``    — dark base, hue-separated saturated blobs in fixed slots.
+    * ``SOFT``     — bright neutral base, low-saturation gentle blobs.
+    """
+    import random
+
+    rng = rng or random
+    mode = mode if mode in DISTRIBUTION_COLOR_MODES else "BALANCED"
+
+    if mode == "VIVID":
+        n = rng.randint(3, len(_VIVID_GEL))
+        spread_sets = {
+            3: [(0, 1, 3), (0, 1, 4), (0, 2, 4), (1, 2, 4)],
+            4: [(0, 1, 2, 3), (0, 1, 3, 4), (0, 2, 3, 4)],
+            5: [tuple(range(len(_VIVID_GEL)))],
+        }
+        pick = list(rng.choice(spread_sets[n]))
+        blobs = []
+        for i in pick:
+            cx, cy = _VIVID_SLOTS[i]
+            blobs.append((
+                round(cx + rng.uniform(-0.08, 0.08), 2),
+                round(cy + rng.uniform(-0.08, 0.08), 2),
+                round(rng.uniform(1.3, 2.1), 2),
+                round(rng.uniform(0.85, 1.45), 2),
+                _VIVID_GEL[i],
+            ))
+        return dict(
+            base=round(rng.uniform(0.03, 0.10), 2),
+            grad=(round(rng.uniform(0.0, 0.15), 2), round(rng.uniform(0.0, 0.15), 2)),
+            tint=(0.42, 0.46, 0.52),
+            blobs=blobs,
+            rim=round(rng.uniform(0.0, 0.5), 2) if rng.random() < 0.25 else 0.0,
+            vignette=round(rng.uniform(0.15, 0.45), 2),
+            stripes=0.0,
+            dapple=0,
+            dapple_seed=rng.randint(0, 9999),
+        )
+
+    if mode == "SOFT":
+        n_blobs = rng.randint(1, 2)
+        blobs = []
+        for _ in range(n_blobs):
+            blobs.append((
+                round(rng.uniform(-0.45, 0.45), 2),
+                round(rng.uniform(-0.35, 0.55), 2),
+                round(rng.uniform(0.55, 1.0), 2),
+                round(rng.uniform(0.35, 0.65), 2),
+                rng.choice(_SOFT_GEL),
+            ))
+        return dict(
+            base=round(rng.uniform(0.32, 0.55), 2),
+            grad=(round(rng.uniform(0.0, 0.25), 2), round(rng.uniform(0.0, 0.25), 2)),
+            tint=rng.choice(_SOFT_TINTS),
+            blobs=blobs,
+            rim=0.0,
+            vignette=round(rng.uniform(0.0, 0.2), 2) if rng.random() < 0.3 else 0.0,
+            stripes=0.0,
+            dapple=0,
+            dapple_seed=rng.randint(0, 9999),
+        )
+
+    n_blobs = rng.randint(1, 3)
+    blobs = []
+    for _ in range(n_blobs):
+        blobs.append((
+            round(rng.uniform(-0.8, 0.8), 2),
+            round(rng.uniform(-0.7, 0.85), 2),
+            round(rng.uniform(0.7, 2.4), 2),
+            round(rng.uniform(0.5, 1.1), 2),
+            rng.choice(_BALANCED_GEL),
+        ))
+    return dict(
+        base=round(rng.uniform(0.03, 0.5), 2),
+        grad=(round(rng.uniform(0.0, 0.6), 2), round(rng.uniform(0.0, 0.6), 2)),
+        tint=rng.choice(_BALANCED_GEL),
+        blobs=blobs,
+        rim=round(rng.uniform(0.0, 1.2), 2) if rng.random() < 0.4 else 0.0,
+        vignette=round(rng.uniform(0.0, 0.5), 2) if rng.random() < 0.5 else 0.0,
+        stripes=rng.choice((0.0, 0.0, 0.0, 5.0, 7.0)),
+        dapple=rng.choice((0, 0, 0, 12)),
+        dapple_seed=rng.randint(0, 9999),
+    )
+
+
 REFERENCE_PRESETS = {
     "random":      dict(base=0.06, blobs=[(-0.55, 0.3, 1.2, 0.8, _MAG),
                                           (0.55, -0.1, 1.2, 0.8, _CYAN),
@@ -363,7 +483,3 @@ def main():
     print("\nAssets written to:")
     print(" ", ICON_DIR)
     print(" ", REF_DIR)
-
-
-if __name__ == "__main__":
-    main()

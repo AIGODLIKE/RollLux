@@ -42,7 +42,7 @@ def main() -> int:
     ui_keys: set[str] = set()
     for fn in ("ui.py", "operators.py"):
         text = open(os.path.join(ROOT, fn), encoding="utf-8").read()
-        ui_keys.update(re.findall(r"""tr\(lang,\s*['\"]([a-zA-Z0-9_]+)['\"]""", text))
+        ui_keys.update(re.findall(r"""tr\(\s*['\"]([a-zA-Z0-9_]+)['\"]""", text))
     for key in sorted(ui_keys):
         if key not in TR:
             issues.append(f"UI tr() key missing from TR: {key!r}")
@@ -73,14 +73,16 @@ def main() -> int:
     for fn in (
         "ui_mode_items", "ae_apply_to_items", "ae_center_preset_items",
         "ae_mode_items", "mode_items", "target_items", "orient_items",
-        "color_strategy_items", "corner_items",
+        "color_strategy_items", "distribution_color_mode_items", "corner_items",
     ):
         for item in getattr(T, fn)(s, None):
             name = item[1]
             desc = item[2] if len(item) > 2 else ""
-            if name.startswith(("ae_", "ui_mode_", "desc_", "mode_", "target_", "orient_")):
+            if name.startswith(("ae_", "ui_mode_", "desc_", "mode_", "target_", "orient_",
+                                "distribution_color_mode_", "color_strategy_")):
                 issues.append(f"{fn} untranslated label: {name!r}")
-            if desc and desc.startswith(("ae_", "desc_", "mode_", "target_", "orient_")):
+            if desc and desc.startswith(("ae_", "desc_", "mode_", "target_", "orient_",
+                                          "distribution_color_mode_", "color_strategy_")):
                 issues.append(f"{fn} untranslated desc: {item[0]!r} -> {desc!r}")
 
     op_text = open(os.path.join(ROOT, "operators.py"), encoding="utf-8").read()
@@ -89,7 +91,7 @@ def main() -> int:
 
     from translations import _OPERATOR_LABELS
     for cls_name in (
-        "paste_image", "open_image", "analyze", "generate", "clear",
+        "open_image", "analyze", "generate", "clear",
         "preset_step", "random_preset", "auto_timer", "reference_step",
         "random_reference", "set_rendered", "bake_ae", "delete_light",
     ):

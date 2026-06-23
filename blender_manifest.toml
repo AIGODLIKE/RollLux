@@ -1,13 +1,13 @@
 schema_version = "1.0.0"
 
 id = "rolllux"
-version = "5.0.0"
+version = "5.5.3"
 name = "RollLux"
 tagline = "Perceptive Full-Auto Metering Lighting"
 maintainer = "ACGGIT"
 type = "add-on"
 
-tags = ["Lighting", "Render", "Animation"]
+tags = ["Lighting", "Render"]
 
 blender_version_min = "5.0.0"
 

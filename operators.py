@@ -9,7 +9,7 @@ from bpy.props import IntProperty, StringProperty
 from bpy.types import Operator
 from bpy_extras.io_utils import ImportHelper
 
-from . import clipboard, lighting, overlay, presets, translations
+from . import lighting, overlay, presets, translations
 from .translations import tr
 
 
@@ -41,36 +41,6 @@ def _schedule_enum_step(context, prop_id: str, order: tuple[str, ...], direction
     bpy.app.timers.register(_apply, first_interval=0.0)
 
 
-class RLLX_OT_paste_image(Operator):
-    """Paste a lighting reference image from the system clipboard"""
-    bl_idname = "rolllux.paste_image"
-    bl_label = "Paste Reference Image"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        lang = context.scene.rolllux.language
-        path = clipboard.grab_clipboard_image()
-        if not path:
-            self.report({"ERROR"}, tr(lang, "err_no_clip"))
-            return {"CANCELLED"}
-
-        for old in list(bpy.data.images):
-            if old.name.startswith("RollLux_Clipboard") and old.users == 0:
-                bpy.data.images.remove(old)
-
-        try:
-            img = bpy.data.images.load(path, check_existing=False)
-            img.pack()  # embed pixels so the temp file can vanish safely
-        except RuntimeError as exc:
-            self.report({"ERROR"}, tr(lang, "err_load", err=exc))
-            return {"CANCELLED"}
-        img.name = "RollLux_Clipboard"
-        context.scene.rolllux.reference_image = img
-        overlay.tag_redraw()
-        self.report({"INFO"}, tr(lang, "msg_pasted", name=img.name))
-        return {"FINISHED"}
-
-
 class RLLX_OT_open_image(Operator, ImportHelper):
     """Load a lighting reference image from disk"""
     bl_idname = "rolllux.open_image"
@@ -83,18 +53,17 @@ class RLLX_OT_open_image(Operator, ImportHelper):
     )
 
     def execute(self, context):
-        lang = context.scene.rolllux.language
         if not self.filepath or not os.path.isfile(self.filepath):
-            self.report({"ERROR"}, tr(lang, "err_no_file"))
+            self.report({"ERROR"}, tr("err_no_file"))
             return {"CANCELLED"}
         try:
             img = bpy.data.images.load(self.filepath, check_existing=True)
         except RuntimeError as exc:
-            self.report({"ERROR"}, tr(lang, "err_load", err=exc))
+            self.report({"ERROR"}, tr("err_load", err=exc))
             return {"CANCELLED"}
         context.scene.rolllux.reference_image = img
         overlay.tag_redraw()
-        self.report({"INFO"}, tr(lang, "msg_loaded", name=img.name))
+        self.report({"INFO"}, tr("msg_loaded", name=img.name))
         return {"FINISHED"}
 
 
@@ -109,21 +78,18 @@ class RLLX_OT_analyze(Operator):
         s = context.scene.rolllux
         if s.reference_image is not None:
             return True
-        # Enable when the built-in default exists; image loads on execute/draw.
-        import os
         from . import presets as _presets
         return os.path.isfile(_presets.reference_path(_presets.DEFAULT_REFERENCE))
 
     def execute(self, context):
         from . import properties as _props
         _props.ensure_default_reference(context.scene, context)
-        lang = context.scene.rolllux.language
         profile, err = lighting.analyze_only(context)
         if err:
             key = "err_no_image" if err == "no_image" else "err_analysis"
-            self.report({"ERROR"}, tr(lang, key, err=err))
+            self.report({"ERROR"}, tr(key, err=err))
             return {"CANCELLED"}
-        self.report({"INFO"}, tr(lang, "msg_analyzed", mood=profile.mood,
+        self.report({"INFO"}, tr("msg_analyzed", mood=profile.mood,
                                  c=f"{profile.contrast_ratio:.1f}"))
         return {"FINISHED"}
 
@@ -141,17 +107,16 @@ class RLLX_OT_generate(Operator):
     def execute(self, context):
         from . import properties as _props
         s = context.scene.rolllux
-        lang = s.language
         if _props._reference_missing(s):
             if not _props.load_random_reference(context):
-                self.report({"ERROR"}, tr(lang, "err_load", err="random reference"))
+                self.report({"ERROR"}, tr("err_load", err="random reference"))
                 return {"CANCELLED"}
         summary, err = lighting.analyze_and_generate(context)
         if err:
             key = "err_no_image" if err == "no_image" else "err_analysis"
-            self.report({"ERROR"}, tr(lang, key, err=err))
+            self.report({"ERROR"}, tr(key, err=err))
             return {"CANCELLED"}
-        self.report({"INFO"}, tr(lang, "msg_created", n=summary["lights"]))
+        self.report({"INFO"}, tr("msg_created", n=summary["lights"]))
         return {"FINISHED"}
 
 
@@ -162,10 +127,9 @@ class RLLX_OT_clear(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        lang = context.scene.rolllux.language
         removed = lighting.clear_previous(context)
         context.scene.rolllux_result.valid = False
-        self.report({"INFO"}, tr(lang, "msg_removed", n=removed))
+        self.report({"INFO"}, tr("msg_removed", n=removed))
         return {"FINISHED"}
 
 
@@ -203,8 +167,8 @@ class RLLX_OT_random_preset(Operator):
             if s.reference_image is not None:
                 lighting.schedule_analyze_and_generate(context)
         else:
-            s.lighting_preset = "random"  # _on_preset applies defaults + deferred regen
-        self.report({"INFO"}, tr(s.language, "msg_random_preset"))
+            s.lighting_preset = "random"
+        self.report({"INFO"}, tr("msg_random_preset"))
         return {"FINISHED"}
 
 
@@ -218,11 +182,11 @@ class RLLX_OT_random_reference(Operator):
         s = context.scene.rolllux
         from . import properties as _props
         if not _props.load_random_reference(context):
-            self.report({"ERROR"}, tr(s.language, "err_load", err="random reference"))
+            self.report({"ERROR"}, tr("err_load", err="random reference"))
             return {"CANCELLED"}
         if lighting.has_rig():
             lighting.schedule_analyze_and_generate(context)
-        self.report({"INFO"}, tr(s.language, "msg_random_reference"))
+        self.report({"INFO"}, tr("msg_random_reference"))
         return {"FINISHED"}
 
 
@@ -235,17 +199,17 @@ class RLLX_OT_auto_timer(Operator):
 
     def execute(self, context):
         s = context.scene.rolllux
-        if s.auto_timer:  # already running -> stop
+        if s.auto_timer:
             s.auto_timer = False
             return {"FINISHED"}
         wm = context.window_manager
-        if context.window is None:  # headless: nothing to drive a modal loop
-            self.report({"WARNING"}, tr(s.language, "err_no_window"))
+        if context.window is None:
+            self.report({"WARNING"}, tr("err_no_window"))
             return {"CANCELLED"}
         s.auto_timer = True
         self._timer = wm.event_timer_add(s.timer_interval, window=context.window)
         wm.modal_handler_add(self)
-        self.report({"INFO"}, tr(s.language, "msg_timer_on"))
+        self.report({"INFO"}, tr("msg_timer_on"))
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
@@ -266,7 +230,7 @@ class RLLX_OT_auto_timer(Operator):
             wm.event_timer_remove(self._timer)
             self._timer = None
         context.scene.rolllux.auto_timer = False
-        self.report({"INFO"}, tr(context.scene.rolllux.language, "msg_timer_off"))
+        self.report({"INFO"}, tr("msg_timer_off"))
 
 
 class RLLX_OT_reference_step(Operator):
@@ -293,11 +257,10 @@ class RLLX_OT_set_rendered(Operator):
 
     def execute(self, context):
         from . import auto_exposure
-        lang = context.scene.rolllux.language
         if auto_exposure.try_set_rendered_shading(context):
-            self.report({"INFO"}, tr(lang, "msg_set_rendered"))
+            self.report({"INFO"}, tr("msg_set_rendered"))
             return {"FINISHED"}
-        self.report({"WARNING"}, tr(lang, "err_no_view3d"))
+        self.report({"WARNING"}, tr("err_no_view3d"))
         return {"CANCELLED"}
 
 
@@ -309,17 +272,15 @@ class RLLX_OT_bake_ae(Operator):
 
     @classmethod
     def poll(cls, context):
-        s = context.scene.rolllux
-        return s.auto_exposure
+        return context.scene.rolllux.auto_exposure
 
     def execute(self, context):
         from . import auto_exposure
-        lang = context.scene.rolllux.language
         mode = auto_exposure.apply_auto_exposure(context)
         if mode is None:
             return {"CANCELLED"}
         key = "msg_ae_applied_light" if mode == "LIGHT_RIG" else "msg_ae_baked"
-        self.report({"INFO"}, tr(lang, key))
+        self.report({"INFO"}, tr(key))
         return {"FINISHED"}
 
 
@@ -332,16 +293,14 @@ class RLLX_OT_delete_light(Operator):
     name: StringProperty()
 
     def execute(self, context):
-        lang = context.scene.rolllux.language
         ok = lighting.delete_light(context, self.name)
         if not ok:
             return {"CANCELLED"}
-        self.report({"INFO"}, tr(lang, "msg_light_deleted"))
+        self.report({"INFO"}, tr("msg_light_deleted"))
         return {"FINISHED"}
 
 
 _classes = (
-    RLLX_OT_paste_image,
     RLLX_OT_open_image,
     RLLX_OT_analyze,
     RLLX_OT_generate,
@@ -361,7 +320,6 @@ def register():
     for cls in _classes:
         bpy.utils.register_class(cls)
     translations.register_operators_i18n(*_classes)
-    translations.apply_operator_i18n(translations.detect_language())
 
 
 def unregister():

@@ -8,16 +8,82 @@ updates the panel immediately.
 
 from __future__ import annotations
 
-LANGUAGES = (
-    ("EN", "English", "English"),
-    ("ZH", "\u4e2d\u6587", "Chinese"),
-    ("JA", "\u65e5\u672c\u8a9e", "Japanese"),
-)
-
 # key -> {EN, ZH, JA}
 TR = {
     # generic / header
     "language": {"EN": "Language", "ZH": "\u8bed\u8a00", "JA": "\u8a00\u8a9e"},
+    "mcp_connect": {"EN": "Connect MCP", "ZH": "\u8fde\u63a5 MCP", "JA": "MCP \u63a5\u7d9a"},
+    "mcp_disconnect": {"EN": "Disconnect MCP", "ZH": "\u65ad\u5f00 MCP", "JA": "MCP \u5207\u65ad"},
+    "mcp_start": {
+        "EN": "Start MCP",
+        "ZH": "\u542f\u52a8 MCP",
+        "JA": "MCP \u958b\u59cb",
+    },
+    "mcp_running_short": {
+        "EN": "MCP · {port}",
+        "ZH": "MCP \u00b7 {port}",
+        "JA": "MCP \u00b7 {port}",
+    },
+    "mcp_status_running": {
+        "EN": "Service running on port {port}",
+        "ZH": "\u670d\u52a1\u8fd0\u884c\u4e2d \u00b7 \u7aef\u53e3 {port}",
+        "JA": "\u30b5\u30fc\u30d3\u30b9\u5b9f\u884c\u4e2d \u00b7 \u30dd\u30fc\u30c8 {port}",
+    },
+    "mcp_status_listening": {
+        "EN": "Waiting for Cursor connection",
+        "ZH": "\u7b49\u5f85 Cursor \u8fde\u63a5",
+        "JA": "Cursor \u306e\u63a5\u7d9a\u3092\u5f85\u6a5f",
+    },
+    "mcp_status_stopped": {
+        "EN": "Service stopped",
+        "ZH": "\u670d\u52a1\u5df2\u505c\u6b62",
+        "JA": "\u30b5\u30fc\u30d3\u30b9\u505c\u6b62",
+    },
+    "mcp_status_idle": {
+        "EN": "Click Start MCP in the panel header",
+        "ZH": "\u70b9\u51fb\u9762\u677f\u6807\u9898\u680f\u542f\u52a8 MCP",
+        "JA": "\u30d8\u30c3\u30c0\u30fc\u306e MCP \u958b\u59cb\u3092\u30af\u30ea\u30c3\u30af",
+    },
+    "mcp_status_connected": {
+        "EN": "Connected — port {port}",
+        "ZH": "\u5df2\u8fde\u63a5 \u2014 \u7aef\u53e3 {port}",
+        "JA": "\u63a5\u7d9a\u6e08\u307f \u2014 \u30dd\u30fc\u30c8 {port}",
+    },
+    "mcp_status_disconnected": {
+        "EN": "MCP disconnected",
+        "ZH": "MCP \u672a\u8fde\u63a5",
+        "JA": "MCP \u672a\u63a5\u7d9a",
+    },
+    "mcp_hint": {
+        "EN": "Cursor can control RollLux when connected (port 9886)",
+        "ZH": "\u8fde\u63a5\u540e Cursor \u53ef\u901a\u8fc7 MCP \u63a7\u5236 RollLux\uff08\u9ed8\u8ba4\u7aef\u53e3 9886\uff09",
+        "JA": "\u63a5\u7d9a\u5f8c\u3001Cursor \u304b\u3089 MCP \u3067 RollLux \u3092\u64cd\u4f5c\u3067\u304d\u307e\u3059\uff08\u30c7\u30d5\u30a9\u30eb\u30c8 9886\uff09",
+    },
+    "mcp_msg_connected": {
+        "EN": "RollLux MCP on port {port}",
+        "ZH": "RollLux MCP \u5df2\u542f\u52a8\uff0c\u7aef\u53e3 {port}",
+        "JA": "RollLux MCP \u30dd\u30fc\u30c8 {port} \u3067\u5f85\u6a5f\u4e2d",
+    },
+    "mcp_msg_disconnected": {
+        "EN": "RollLux MCP stopped",
+        "ZH": "RollLux MCP \u5df2\u505c\u6b62",
+        "JA": "RollLux MCP \u3092\u505c\u6b62\u3057\u307e\u3057\u305f",
+    },
+    "mcp_msg_gui_only": {
+        "EN": "MCP bridge requires Blender GUI",
+        "ZH": "MCP \u6865\u63a5\u9700\u8981 Blender \u56fe\u5f62\u754c\u9762",
+        "JA": "MCP \u30d6\u30ea\u30c3\u30b8\u306f Blender GUI \u304c\u5fc5\u8981\u3067\u3059",
+    },
+    "desc_mcp_port": {
+        "EN": "TCP port for Cursor MCP clients",
+        "ZH": "Cursor MCP \u5ba2\u6237\u7aef\u8fde\u63a5\u7684 TCP \u7aef\u53e3",
+        "JA": "Cursor MCP \u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u7528 TCP \u30dd\u30fc\u30c8",
+    },
+    "desc_mcp_auto_connect": {
+        "EN": "Start MCP bridge automatically when RollLux loads",
+        "ZH": "\u52a0\u8f7d RollLux \u65f6\u81ea\u52a8\u542f\u52a8 MCP \u6865\u63a5",
+        "JA": "RollLux \u8aad\u307f\u8fbc\u307f\u6642\u306b MCP \u30d6\u30ea\u30c3\u30b8\u3092\u81ea\u52d5\u958b\u59cb",
+    },
     "img_size": {"EN": "{w} x {h} px", "ZH": "{w} x {h} \u50cf\u7d20", "JA": "{w} x {h} px"},
     "no_image": {"EN": "No reference image",
                  "ZH": "\u672a\u9009\u62e9\u53c2\u8003\u56fe",
@@ -108,8 +174,18 @@ TR = {
                                   "ZH": "\u5207\u6362\u7b56\u7565\u65f6\u9501\u5b9a\u9ad8\u5149",
                                   "JA": "\u30b9\u30c8\u30e9\u30c6\u30b8\u30fc\u5207\u66ff\u6642\u306b\u30cf\u30a4\u30e9\u30a4\u30c8\u3092\u30ed\u30c3\u30af"},
     "desc_lock_contrast_boost": {"EN": "Lock contrast when switching Strategy presets",
-                                 "ZH": "\u5207\u6362\u7b56\u7565\u65f6\u9501\u5b9a\u5bf9\u6bd4\u5ea6",
-                                 "JA": "\u30b9\u30c8\u30e9\u30c6\u30b8\u30fc\u5207\u66ff\u6642\u306b\u30b3\u30f3\u30c8\u30e9\u30b9\u30c8\u3092\u30ed\u30c3\u30af"},
+                               "ZH": "\u5207\u6362\u7b56\u7565\u65f6\u9501\u5b9a\u5bf9\u6bd4\u5ea6",
+                               "JA": "\u30b9\u30c8\u30e9\u30c6\u30b8\u30fc\u5207\u66ff\u6642\u306b\u30b3\u30f3\u30c8\u30e9\u30b9\u30c8\u3092\u30ed\u30c3\u30af"},
+    "lock_light_colors": {
+        "EN": "Lock Colors",
+        "ZH": "\u9501\u5b9a\u989c\u8272",
+        "JA": "\u8272\u3092\u30ed\u30c3\u30af",
+    },
+    "desc_lock_light_colors": {
+        "EN": "Keep per-light colors when regenerating or switching Strategy",
+        "ZH": "\u91cd\u65b0\u751f\u6210\u6216\u5207\u6362\u7b56\u7565\u65f6\u4fdd\u7559\u5404\u76cf\u706f\u989c\u8272",
+        "JA": "\u518d\u751f\u6210\u3084\u30b9\u30c8\u30e9\u30c6\u30b8\u30fc\u5207\u66ff\u6642\u306b\u5404\u30e9\u30a4\u30c8\u306e\u8272\u3092\u7dad\u6301",
+    },
     "intensity": {"EN": "Intensity", "ZH": "\u5f3a\u5ea6", "JA": "\u5f37\u5ea6"},
     "exposure": {"EN": "Exposure", "ZH": "\u66dd\u5149\u7cfb\u6570", "JA": "\u9732\u5149\u500d\u7387"},
     "auto_exposure": {"EN": "Auto Exposure", "ZH": "\u81ea\u52a8\u66dd\u5149", "JA": "\u81ea\u52d5\u9732\u5149"},
@@ -385,6 +461,33 @@ TR = {
     "color_strategy_soft_desc": {"EN": "Lower saturation toward neutral, gentle tones",
                                "ZH": "\u964d\u4f4e\u9971\u548c\u5ea6\uff0c\u504f\u4e2d\u6027\u67d4\u548c",
                                "JA": "\u5f69\u5ea6\u3092\u6291\u3048\u3066\u67d4\u3089\u304b\u306a\u4e2d\u6027\u8272\u306b"},
+    "color_strategy_distinct": {"EN": "Distinct", "ZH": "\u5f02\u8272\u5206\u7acb", "JA": "\u8272\u76f8\u5206\u96e2"},
+    "color_strategy_distinct_desc": {
+        "EN": "Skip similar hues when sampling; prefer clearly separated light colors",
+        "ZH": "\u91c7\u6837\u65f6\u8df3\u8fc7\u76f8\u8fd1\u8272\u76f8\uff0c\u4f18\u5148\u9009\u53d6\u5dee\u5f02\u660e\u663e\u7684\u706f\u5149\u8272",
+        "JA": "\u8fd1\u3044\u8272\u76f8\u3092\u30b9\u30ad\u30c3\u30d7\u3057\u3001\u5dee\u306e\u306f\u3063\u304d\u308a\u3057\u305f\u30e9\u30a4\u30c8\u8272\u3092\u512a\u5148",
+    },
+
+    "distribution_color_mode": {"EN": "Distribution Color", "ZH": "\u5206\u5e03\u56fe\u8272\u5f69",
+                                "JA": "\u5206\u5e03\u56fe\u306e\u8272"},
+    "distribution_color_mode_balanced": {"EN": "Balanced", "ZH": "\u5747\u8861", "JA": "\u5747\u8861"},
+    "distribution_color_mode_balanced_desc": {
+        "EN": "Mixed warm/cool blobs with moderate contrast",
+        "ZH": "\u6696\u51b7\u8272\u5757\u6df7\u642d\uff0c\u5bf9\u6bd4\u5ea6\u9002\u4e2d",
+        "JA": "\u6696\u8272\u3068\u51b7\u8272\u3092\u6df7\u305c\u305f\u4e2d\u7a0b\u5ea6\u306e\u5bfe\u6bd4",
+    },
+    "distribution_color_mode_vivid": {"EN": "Vivid", "ZH": "\u6781\u8272\u5f69", "JA": "\u30d3\u30d3\u30c3\u30c9"},
+    "distribution_color_mode_vivid_desc": {
+        "EN": "Dark base with hue-separated saturated blobs for strong color contrast",
+        "ZH": "\u6697\u8272\u5e95\u4e0a\u653e\u7f6e\u8272\u76f8\u5206\u79bb\u7684\u9ad8\u9971\u548c\u8272\u5757\uff0c\u8272\u5f69\u5bf9\u6bd4\u66f4\u5f3a",
+        "JA": "\u6697\u3044\u5e95\u306b\u8272\u76f8\u3092\u5206\u3051\u305f\u9ad8\u5f69\u5ea6\u306e\u8272\u5757\u3067\u8272\u306e\u5dee\u3092\u5927\u304d\u304f",
+    },
+    "distribution_color_mode_soft": {"EN": "Soft", "ZH": "\u67d4\u548c", "JA": "\u30bd\u30d5\u30c8"},
+    "distribution_color_mode_soft_desc": {
+        "EN": "Bright neutral base with low-saturation gentle blobs",
+        "ZH": "\u660e\u4eae\u4e2d\u6027\u5e95\u4e0a\u653e\u7f6e\u4f4e\u9971\u548c\u67d4\u548c\u8272\u5757",
+        "JA": "\u660e\u308b\u3044\u4e2d\u6027\u8272\u306e\u5e95\u306b\u4f4e\u5f69\u5ea6\u306e\u67d4\u3089\u304b\u306a\u8272\u5757",
+    },
 
     # property tooltips (synced to RNA when language changes)
     "desc_language": {"EN": "UI language for this add-on",
@@ -408,6 +511,11 @@ TR = {
     "desc_color_strategy": {"EN": "Global color sampling scheme for lights and detection",
                             "ZH": "\u5f71\u54cd\u706f\u5149\u4e0e\u68c0\u6d4b\u7ed3\u679c\u7684\u5168\u5c40\u53d6\u8272\u65b9\u6848",
                             "JA": "\u30e9\u30a4\u30c8\u3068\u691c\u51fa\u8272\u306b\u5f71\u97ff\u3059\u308b\u5168\u5c40\u53d6\u8272"},
+    "desc_distribution_color_mode": {
+        "EN": "Color strategy when rolling a random lighting-distribution reference",
+        "ZH": "\u968f\u673a\u751f\u6210\u7167\u660e\u5206\u5e03\u53c2\u8003\u56fe\u65f6\u7684\u8272\u5f69\u7b56\u7565",
+        "JA": "\u30e9\u30f3\u30c0\u30e0\u7167\u660e\u5206\u5e03\u53c2\u7167\u753b\u50cf\u751f\u6210\u6642\u306e\u8272\u6226\u7565",
+    },
     "desc_live": {"EN": "Apply slider changes to the rig in real time",
                   "ZH": "\u5b9e\u65f6\u5c06\u6ed1\u5757\u8c03\u6574\u5e94\u7528\u5230\u706f\u5149\u67b6",
                   "JA": "\u30b9\u30e9\u30a4\u30c0\u30fc\u306e\u5909\u66f4\u3092\u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u3067\u9069\u7528"},
@@ -840,7 +948,6 @@ for _rid, _v in _REF_I18N.items():
 
 # RNA property name -> translation key for tooltip sync.
 _PROP_DESC = {
-    "language": "desc_language",
     "ui_mode": "desc_ui_mode",
     "reference_image": "desc_reference",
     "lighting_preset": "desc_lighting_preset",
@@ -851,6 +958,7 @@ _PROP_DESC = {
     "use_luxpro": "desc_luxpro",
     "light_count": "desc_light_count",
     "color_strategy": "desc_color_strategy",
+    "distribution_color_mode": "desc_distribution_color_mode",
     "live": "desc_live",
     "intensity": "desc_intensity",
     "exposure": "desc_exposure",
@@ -888,6 +996,9 @@ _PROP_DESC = {
     "lock_tone_shadows": "desc_lock_tone_shadows",
     "lock_tone_highlights": "desc_lock_tone_highlights",
     "lock_contrast_boost": "desc_lock_contrast_boost",
+    "lock_light_colors": "desc_lock_light_colors",
+    "mcp_port": "desc_mcp_port",
+    "mcp_auto_connect": "desc_mcp_auto_connect",
 }
 
 # RNA property name= (English) -> TR label key (icon-only controls).
@@ -899,7 +1010,6 @@ _PROP_NAME = {
 _OPERATOR_CLASSES: list = []
 
 _OPERATOR_LABELS = {
-    "rolllux.paste_image": "btn_paste",
     "rolllux.open_image": "op_open_image",
     "rolllux.analyze": "analyze",
     "rolllux.generate": "generate",
@@ -912,58 +1022,52 @@ _OPERATOR_LABELS = {
     "rolllux.set_rendered": "set_rendered",
     "rolllux.bake_ae": "ae_apply_exposure",
     "rolllux.delete_light": "op_delete_light",
+    "rolllux_mcp.toggle": "mcp_start",
+    "rolllux_mcp.connect": "mcp_connect",
+    "rolllux_mcp.disconnect": "mcp_disconnect",
 }
 
 
 def register_operators_i18n(*classes) -> None:
     global _OPERATOR_CLASSES
-    _OPERATOR_CLASSES = list(classes)
+    for cls in classes:
+        if cls not in _OPERATOR_CLASSES:
+            _OPERATOR_CLASSES.append(cls)
 
 
-def apply_operator_i18n(lang: str | None = None) -> None:
-    lang = lang or "EN"
+def apply_operator_i18n() -> None:
     for cls in _OPERATOR_CLASSES:
         key = _OPERATOR_LABELS.get(getattr(cls, "bl_idname", ""))
         if key:
-            cls.bl_label = tr(lang, key)
+            cls.bl_label = tr(key)
 
 
 def rna_desc(prop: str) -> str:
-    """English RNA description string (translated at display time via sync_i18n)."""
+    """English RNA description (translated via bpy.app.translations at display time)."""
     key = _PROP_DESC.get(prop)
-    return tr("EN", key) if key else ""
+    if not key:
+        return ""
+    return TR.get(key, {}).get("EN", "")
 
 
-_RNA_DESC_EN: dict[tuple[str, str], str] = {}
-_RNA_NAME_EN: dict[tuple[str, str], str] = {}
-_I18N_CLASSES: list = []
+def _addon_module_name() -> str:
+    return __name__.rsplit(".", 1)[0]
 
 
-def register_i18n_classes(*classes) -> None:
-    """Call from properties.register() after RNA types are registered."""
-    global _I18N_CLASSES
-    _I18N_CLASSES = list(classes)
-
-
-def _set_rna_str(rna_prop, attr: str, value: str) -> None:
-    try:
-        setattr(rna_prop, attr, value)
-    except (AttributeError, TypeError):
-        pass
-
-
-def _translation_map(target: str) -> dict[str, str]:
-    mapping: dict[str, str] = {}
-    for key, entry in TR.items():
-        if not key.startswith("desc_"):
-            continue
-        en = entry.get("EN", "")
-        loc = entry.get(target, "")
-        if not en or not loc:
-            continue
-        mapping[en] = loc
-        mapping[f"{en}."] = loc
-    return mapping
+def _build_translation_dict() -> dict[str, dict[tuple[str | None, str], str]]:
+    trans: dict[str, dict[tuple[str | None, str], str]] = {}
+    for locale, lang in (("zh_CN", "ZH"), ("zh_HANS", "ZH"), ("ja_JP", "JA")):
+        mapping: dict[tuple[str | None, str], str] = {}
+        for _key, entry in TR.items():
+            en = str(entry.get("EN", "")).strip()
+            loc = str(entry.get(lang, "")).strip()
+            if not en or not loc or loc == en:
+                continue
+            mapping[(None, en)] = loc
+            if not en.endswith("."):
+                mapping[(None, f"{en}.")] = loc
+        trans[locale] = mapping
+    return trans
 
 
 def _blender_reg_map(string_map: dict[str, str]) -> dict[tuple[str | None, str], str]:
@@ -971,106 +1075,40 @@ def _blender_reg_map(string_map: dict[str, str]) -> dict[tuple[str | None, str],
     return {(None, msgid): text for msgid, text in string_map.items()}
 
 
-def _blender_locale(lang: str | None) -> str:
-    try:
-        import bpy
-        code = (bpy.context.preferences.view.language or "").strip()
-        if code:
-            return code
-    except Exception:
-        pass
-    return {"ZH": "zh_CN", "JA": "ja_JP"}.get(lang or "EN", "en_US")
+def register() -> None:
+    import bpy
 
-
-def apply_rna_i18n(lang: str | None = None) -> None:
-    """Write localized RNA names/descriptions (addon language, not Blender UI locale)."""
-    lang = lang or "EN"
-    if not _I18N_CLASSES:
-        return
-    for cls in _I18N_CLASSES:
-        bl_rna = getattr(cls, "bl_rna", None)
-        if bl_rna is None:
-            continue
-        for prop_id, rna_prop in bl_rna.properties.items():
-            cache = (cls.__name__, prop_id)
-            desc_key = _PROP_DESC.get(prop_id)
-            if desc_key:
-                if cache not in _RNA_DESC_EN:
-                    _RNA_DESC_EN[cache] = rna_prop.description or tr("EN", desc_key)
-                text = _RNA_DESC_EN[cache] if lang == "EN" else tr(lang, desc_key)
-                _set_rna_str(rna_prop, "description", text)
-            name_key = _PROP_NAME.get(prop_id)
-            if name_key:
-                if cache not in _RNA_NAME_EN:
-                    _RNA_NAME_EN[cache] = rna_prop.name or tr("EN", name_key)
-                text = _RNA_NAME_EN[cache] if lang == "EN" else tr(lang, name_key)
-                _set_rna_str(rna_prop, "name", text)
-
-
-def sync_descriptions(lang: str | None = None) -> None:
-    """Register Blender UI translations for RNA tooltip strings (fallback path)."""
-    try:
-        import bpy
-    except Exception:
-        return
-    lang = lang or "EN"
-    trans: dict[str, dict[tuple[str | None, str], str]] = {}
-    zh_map = _blender_reg_map(_translation_map("ZH"))
-    ja_map = _blender_reg_map(_translation_map("JA"))
-    if zh_map:
-        trans["zh_CN"] = dict(zh_map)
-        trans["zh_HANS"] = dict(zh_map)
-    if ja_map:
-        trans["ja_JP"] = dict(ja_map)
-    if lang == "ZH":
-        trans["en_US"] = dict(zh_map)
-        trans["en"] = dict(zh_map)
-        trans[_blender_locale("ZH")] = dict(zh_map)
-    elif lang == "JA":
-        trans["en_US"] = dict(ja_map)
-        trans["en"] = dict(ja_map)
-        trans[_blender_locale("JA")] = dict(ja_map)
-    pkg = __name__.split(".", 1)[0]
-    for mod in {__name__, pkg}:
+    mapping = _build_translation_dict()
+    for mod in {_addon_module_name(), __name__}:
         try:
             bpy.app.translations.unregister(mod)
         except Exception:
             pass
-    for mod in {__name__, pkg}:
+        if mapping:
+            bpy.app.translations.register(mod, mapping)
+    apply_operator_i18n()
+
+
+def unregister() -> None:
+    import bpy
+
+    global _OPERATOR_CLASSES
+    for mod in {_addon_module_name(), __name__}:
         try:
-            bpy.app.translations.register(mod, trans)
+            bpy.app.translations.unregister(mod)
         except Exception:
             pass
+    _OPERATOR_CLASSES = []
 
 
-def sync_i18n(lang: str | None = None) -> None:
-    """Sync addon i18n: RNA strings + Blender translation registry."""
-    lang = lang or "EN"
-    sync_descriptions(lang)
-    apply_rna_i18n(lang)
-    apply_operator_i18n(lang)
-
-
-def detect_language() -> str:
-    """Map Blender's UI language to one of EN / ZH / JA."""
+def tr(key: str, **fmt) -> str:
+    entry = TR.get(key)
+    msgid = entry.get("EN", key) if entry else key
     try:
         import bpy
-        code = (bpy.context.preferences.view.language or "").lower()
+        text = bpy.app.translations.pgettext_iface(msgid)
     except Exception:
-        return "EN"
-    if code.startswith("zh"):
-        return "ZH"
-    if code.startswith("ja"):
-        return "JA"
-    return "EN"
-
-
-def tr(lang: str, key: str, **fmt) -> str:
-    entry = TR.get(key)
-    if not entry:
-        text = key
-    else:
-        text = entry.get(lang) or entry.get("EN") or key
+        text = msgid
     if fmt:
         try:
             text = text.format(**fmt)
@@ -1085,10 +1123,9 @@ _enum_cache: dict = {}
 
 
 def _items(self, key_prefix, ids):
-    lang = getattr(self, "language", "EN")
     items = [
-        (ident, tr(lang, f"{key_prefix}_{suffix}"),
-         tr(lang, f"{key_prefix}_{suffix}_desc"))
+        (ident, tr(f"{key_prefix}_{suffix}"),
+         tr(f"{key_prefix}_{suffix}_desc"))
         for ident, suffix in ids
     ]
     _enum_cache[key_prefix] = items
@@ -1101,8 +1138,20 @@ def mode_items(self, context):
 
 
 def color_strategy_items(self, context):
-    return _items(self, "color_strategy",
-                  (("DEFAULT", "default"), ("VIVID", "vivid"), ("SOFT", "soft")))
+    return _items(self, "color_strategy", (
+        ("DEFAULT", "default"),
+        ("VIVID", "vivid"),
+        ("SOFT", "soft"),
+        ("DISTINCT", "distinct"),
+    ))
+
+
+def distribution_color_mode_items(self, context):
+    return _items(self, "distribution_color_mode", (
+        ("BALANCED", "balanced"),
+        ("VIVID", "vivid"),
+        ("SOFT", "soft"),
+    ))
 
 
 def ae_mode_items(self, context):
@@ -1153,12 +1202,11 @@ def orient_items(self, context):
 
 def corner_items(self, context):
     # BOTTOM_LEFT first so it is the default for new scenes.
-    lang = getattr(self, "language", "EN")
     items = [
-        ("BOTTOM_LEFT", tr(lang, "corner_bl"), ""),
-        ("BOTTOM_RIGHT", tr(lang, "corner_br"), ""),
-        ("TOP_LEFT", tr(lang, "corner_tl"), ""),
-        ("TOP_RIGHT", tr(lang, "corner_tr"), ""),
+        ("BOTTOM_LEFT", tr("corner_bl"), ""),
+        ("BOTTOM_RIGHT", tr("corner_br"), ""),
+        ("TOP_LEFT", tr("corner_tl"), ""),
+        ("TOP_RIGHT", tr("corner_tr"), ""),
     ]
     _enum_cache["corner"] = items
     return items

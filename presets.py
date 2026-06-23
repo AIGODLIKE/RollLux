@@ -110,7 +110,7 @@ PRESET_PARAMS = {
                      distance=3.0, color_strength=1.0, contrast_boost=2.2),
     "twilight":   _p("SCENE", 1.6, False, 0.0, 0.6, "AREA", (0.7, 0.8, 1.05),
                      distance=2.9, color_strength=0.9, contrast_boost=1.0),
-    "neon":       _p("PORTRAIT", 1.0, True, 1.4, 0.4, "AREA", (1.0, 0.5, 0.9),
+    "neon":       _p("PORTRAIT", 1.0, True, 1.4, 0.4, "AREA", (1.0, 1.0, 1.0),
                      intensity=0.21, distance=2.5, color_strength=1.0, contrast_boost=1.8),
     "candlelight": _p("SCENE", 1.4, False, 0.0, 0.5, "POINT", (1.12, 0.72, 0.42),
                       distance=2.4, color_strength=1.0, contrast_boost=1.8),
@@ -292,7 +292,8 @@ def _queue_random_preview(kind: str) -> None:
             pass
         return None
 
-    # Background scripts (headless tests) have no redraw loop — apply immediately.
+    # Background scripts have no redraw loop — apply immediately.
+    pending = _pending_preview_path.get(kind)
     if getattr(bpy.app, "background", False):
         _preview_apply_pending.discard(kind)
         _pending_preview_path[kind] = None
@@ -371,50 +372,27 @@ def _randomize_preset_impl():
     _reload_random_preview("preset")
 
 
-def randomize_reference():
+def randomize_reference(mode: str | None = None):
     """Roll a fresh random reference image into the 'random' slot.
 
-    Returns the path of the generated full-size PNG so the caller can load it
-    as the active reference image.
+    *mode* selects the distribution color strategy (``BALANCED``, ``VIVID``,
+    ``SOFT``).  Returns the path of the generated full-size PNG so the caller
+    can load it as the active reference image.
     """
     global _RANDOMIZING
     if _RANDOMIZING:
         return None
     _RANDOMIZING = True
     try:
-        return _randomize_reference_impl()
+        return _randomize_reference_impl(mode or "BALANCED")
     finally:
         _RANDOMIZING = False
 
 
-def _randomize_reference_impl():
+def _randomize_reference_impl(mode: str = "BALANCED"):
     from . import gen_assets
 
-    palette = [(1.0, 0.78, 0.5), (1.0, 0.58, 0.28), (1.0, 1.0, 1.0),
-               (0.6, 0.72, 1.0), (1.0, 0.3, 0.85), (0.2, 0.85, 0.95),
-               (1.0, 0.45, 0.7), (0.3, 0.5, 1.0), (0.45, 0.95, 0.5),
-               (1.0, 0.5, 0.2)]
-    n_blobs = _random.randint(1, 3)
-    blobs = []
-    for _ in range(n_blobs):
-        blobs.append((
-            round(_random.uniform(-0.8, 0.8), 2),
-            round(_random.uniform(-0.7, 0.85), 2),
-            round(_random.uniform(0.7, 2.4), 2),
-            round(_random.uniform(0.5, 1.1), 2),
-            _random.choice(palette),
-        ))
-    params = dict(
-        base=round(_random.uniform(0.03, 0.5), 2),
-        grad=(round(_random.uniform(0.0, 0.6), 2), round(_random.uniform(0.0, 0.6), 2)),
-        tint=_random.choice(palette),
-        blobs=blobs,
-        rim=round(_random.uniform(0.0, 1.2), 2) if _random.random() < 0.4 else 0.0,
-        vignette=round(_random.uniform(0.0, 0.5), 2) if _random.random() < 0.5 else 0.0,
-        stripes=_random.choice((0.0, 0.0, 0.0, 5.0, 7.0)),
-        dapple=_random.choice((0, 0, 0, 12)),
-        dapple_seed=_random.randint(0, 9999),
-    )
+    params = gen_assets.build_random_reference_params(mode, _random)
     lin = gen_assets.make_ref(gen_assets.REF_SIZE, **params)
     rgb = gen_assets._gamma(lin)
 
@@ -436,12 +414,11 @@ def _randomize_reference_impl():
 # --------------------------------------------------------------------------- #
 def preset_items(self, context):
     load_previews()
-    lang = getattr(self, "language", "EN")
     items = []
     for i, pid in enumerate(PRESET_ORDER):
         pkey = _random_override["preset_key"] if pid == "random" else pid
         icon = _safe_preview_icon(_preset_previews, pkey)
-        items.append((pid, tr(lang, f"preset_{pid}"), tr(lang, f"preset_{pid}_desc"), icon, i))
+        items.append((pid, tr(f"preset_{pid}"), tr(f"preset_{pid}_desc"), icon, i))
     _enum_cache["preset"] = items
     return items
 
@@ -455,18 +432,17 @@ def reference_order(settings) -> tuple[str, ...]:
 
 def reference_items(self, context):
     load_previews()
-    lang = getattr(self, "language", "EN")
     items = []
     for i, rid in enumerate(REFERENCE_ORDER):
         rkey = _random_override["reference_key"] if rid == "random" else rid
         icon = _safe_preview_icon(_ref_previews, rkey)
-        items.append((rid, tr(lang, f"ref_{rid}"), tr(lang, f"ref_{rid}_desc"), icon, i))
+        items.append((rid, tr(f"ref_{rid}"), tr(f"ref_{rid}_desc"), icon, i))
     if getattr(self, "reference_is_custom", False) and self.reference_image:
         icon = _image_preview_icon(self.reference_image)
         items.insert(1, (
             CUSTOM_REFERENCE,
-            tr(lang, "ref_custom"),
-            tr(lang, "ref_custom_desc"),
+            tr("ref_custom"),
+            tr("ref_custom_desc"),
             icon,
             1,
         ))
@@ -527,15 +503,10 @@ _ROLE_PRIORITY = {"key": 0, "accent": 1, "fill": 1, "rim": 2, "sky": 3, "extra":
 
 
 def _palette_color_for_role(role, index, palette, profile, spec):
-    if getattr(profile, "dual_tone", False):
-        if role == "key" and palette:
-            return palette[0]["color"]
-        if role == "accent":
-            return getattr(profile, "accent_color", spec.color)
-        if role == "rim":
-            if len(palette) > 2:
-                return palette[2]["color"]
-            return palette[0]["color"] if palette else spec.color
+    """Legacy helper; prefer ``rig_colors_in_order`` in ``fit_to_count``."""
+    rig = analysis.rig_colors_in_order(profile, max(index + 1, 3))
+    if index < len(rig):
+        return rig[index]
     role_idx = {"key": 0, "fill": 1, "accent": 1, "rim": 2, "sky": 2, "extra": index}
     idx = role_idx.get(role, index)
     if palette and idx < len(palette):
@@ -543,10 +514,11 @@ def _palette_color_for_role(role, index, palette, profile, spec):
     return spec.color
 
 
-def fit_to_count(specs, count, profile, color_strategy: str = "DEFAULT"):
+def fit_to_count(specs, count, profile, color_strategy: str = "DEFAULT", locked_colors=None):
     """Trim or extend a spec list to exactly ``count`` lights.
 
     Each output light gets ``palette[i]`` so sampled colors match light count.
+    When ``locked_colors`` is set, those RGB values are used instead of analysis.
     """
     count = max(1, int(count))
     ordered = sorted(specs, key=lambda s: _ROLE_PRIORITY.get(s.role, 5))
@@ -554,8 +526,19 @@ def fit_to_count(specs, count, profile, color_strategy: str = "DEFAULT"):
     palette = list(getattr(profile, "palette", None) or [])
     rgb = getattr(profile, "rgb_small", None)
     lum = getattr(profile, "lum_small", None)
-    if len(palette) < count and rgb is not None and lum is not None:
+    if locked_colors is None and len(palette) < count and rgb is not None and lum is not None:
         palette = analysis.sample_palette(rgb, lum, count, strategy=color_strategy)
+
+    if palette:
+        profile.palette = palette
+
+    if locked_colors:
+        rig_colors = list(locked_colors)
+        while len(rig_colors) < count:
+            rig_colors.append(rig_colors[-1] if rig_colors else profile.key_color)
+        rig_colors = rig_colors[:count]
+    else:
+        rig_colors = analysis.rig_colors_in_order(profile, count)
 
     if count <= len(ordered):
         out = ordered[:count]
@@ -600,7 +583,7 @@ def fit_to_count(specs, count, profile, color_strategy: str = "DEFAULT"):
 
     final = []
     for i, spec in enumerate(out):
-        color = _palette_color_for_role(spec.role, i, palette, profile, spec)
+        color = rig_colors[i] if i < len(rig_colors) else spec.color
         final.append(analysis.LightSpec(
             role=spec.role, light_type=spec.light_type,
             direction=spec.direction, color=color,

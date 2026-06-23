@@ -23,7 +23,6 @@ _d = translations.rna_desc
 
 # Guards to keep update callbacks from recursing / fighting each other.
 _SUSPEND = False        # while a preset seeds the sliders before a rebuild
-_LANG_SYNCING = False   # while we auto-sync language from Blender prefs
 _REFERENCE_BUSY = False # while ensure_default_reference loads a built-in image
 _DEFAULT_SCHEDULED: set[str] = set()  # scene names with a pending default load
 _GENERATE_SCHEDULED: set[str] = set()  # scene names with a pending custom-load generate
@@ -111,11 +110,12 @@ def _light_edit(self, context):
     lighting.live_update(context)
 
 
-def _on_language(self, context):
-    global _LANG_SYNCING
-    if not _LANG_SYNCING:
-        self.lang_user_set = True
-    translations.sync_i18n(self.language)
+def _on_lock_light_colors(self, context):
+    if not self.lock_light_colors or context is None:
+        return
+    from . import lighting
+    if lighting.has_rig():
+        lighting.capture_colors_to_result(context.scene)
 
 
 def _on_reference_image(self, context):
@@ -154,7 +154,7 @@ def load_random_reference(context) -> bool:
     """Generate and load a random lighting-distribution reference image."""
     global _REFERENCE_BUSY
     s = context.scene.rolllux
-    path = presets.randomize_reference()
+    path = presets.randomize_reference(s.distribution_color_mode)
     try:
         img = bpy.data.images.load(path, check_existing=False)
         img.pack()
@@ -322,11 +322,17 @@ class RLLM_Settings(PropertyGroup):
         items=translations.ui_mode_items,
         default=0,
     )
-    language: EnumProperty(
-        name="Language", description="",
-        items=translations.LANGUAGES, default="EN", update=_on_language,
+    mcp_port: IntProperty(
+        name="MCP Port", default=9886, min=1024, max=65535,
+        description=_d("mcp_port"),
     )
-    lang_user_set: BoolProperty(default=False, options={"HIDDEN"})
+    mcp_auto_connect: BoolProperty(
+        name="MCP Auto Connect", default=True,
+        description=_d("mcp_auto_connect"),
+    )
+    mcp_connected: BoolProperty(
+        name="MCP Connected", default=False, options={"HIDDEN"},
+    )
     reference_user_cleared: BoolProperty(default=False, options={"HIDDEN"})
     reference_is_custom: BoolProperty(default=False, options={"HIDDEN"})
 
@@ -372,6 +378,12 @@ class RLLM_Settings(PropertyGroup):
         update=_on_rebuild,
     )
 
+    distribution_color_mode: EnumProperty(
+        name="Distribution Color", description="",
+        items=translations.distribution_color_mode_items,
+        default=0,
+    )
+
     live: BoolProperty(name="Live", default=True, options={"HIDDEN"})
 
     lock_intensity: BoolProperty(
@@ -413,6 +425,11 @@ class RLLM_Settings(PropertyGroup):
     lock_contrast_boost: BoolProperty(
         name="Lock Contrast", default=False,
         description=_d("lock_contrast_boost"),
+    )
+    lock_light_colors: BoolProperty(
+        name="Lock Light Colors", default=False,
+        description=_d("lock_light_colors"),
+        update=_on_lock_light_colors,
     )
 
     intensity: FloatProperty(name="Intensity", default=0.2, min=0.0, max=20.0,
@@ -544,36 +561,12 @@ class RLLM_Settings(PropertyGroup):
     cache_radius: FloatProperty(default=0.0, options={"HIDDEN"})
 
 
-# --------------------------------------------------------------------------- #
-# Language auto-sync with Blender's UI language
-# --------------------------------------------------------------------------- #
 def _iter_scenes():
     """Safe scene iterator — bpy.data may be restricted during add-on register."""
     try:
         return list(bpy.data.scenes)
     except (AttributeError, TypeError):
         return []
-
-
-def sync_language(scene=None):
-    global _LANG_SYNCING
-    lang = translations.detect_language()
-    scenes = [scene] if scene is not None else _iter_scenes()
-    _LANG_SYNCING = True
-    try:
-        for sc in scenes:
-            s = getattr(sc, "rolllux", None)
-            if s is not None and not s.lang_user_set:
-                s.language = lang
-    finally:
-        _LANG_SYNCING = False
-    active = lang
-    for sc in scenes:
-        s = getattr(sc, "rolllux", None)
-        if s is not None and s.lang_user_set:
-            active = s.language
-            break
-    translations.sync_i18n(active)
 
 
 def needs_default_reference(scene) -> bool:
@@ -642,10 +635,6 @@ def ensure_default_reference(scene=None, context=None):
 
 def _deferred_init():
     try:
-        sync_language()
-    except Exception:
-        pass
-    try:
         ensure_default_reference()
     except Exception:
         pass
@@ -654,12 +643,10 @@ def _deferred_init():
 
 @persistent
 def _on_load(_dummy):
-    sync_language()
     try:
         ensure_default_reference()
     except Exception:
         pass
-
 
     try:
         auto_exposure.restore_handlers()
@@ -676,8 +663,6 @@ def register():
     bpy.types.Scene.rolllux = PointerProperty(type=RLLM_Settings)
     bpy.types.Scene.rolllux_result = PointerProperty(type=RLLM_AnalysisResult)
     bpy.types.Object.rolllux_light = PointerProperty(type=RLLM_LightInfo)
-    translations.register_i18n_classes(RLLM_Settings, RLLM_LightInfo)
-    translations.sync_i18n(translations.detect_language())
     if _on_load not in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.append(_on_load)
     bpy.app.timers.register(_deferred_init, first_interval=0.0)

@@ -138,7 +138,7 @@ https://github.com/user-attachments/assets/801ae6c6-3112-40cc-8e00-fa09bf9785eb
 
 ### 安装
 
-1. 从 [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) 下载 **`rolllux-5.0.0.zip`**。
+1. 从 [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest) 下载 **`rolllux-5.5.3.zip`**。
 2. Blender → **编辑 → 偏好设置 → 获取扩展 → ▼ → 从磁盘安装…**
 3. 选择 zip → 启用 **RollLux**。
 

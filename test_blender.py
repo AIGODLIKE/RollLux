@@ -123,7 +123,7 @@ def main():
         for lng in ("EN", "ZH", "JA"):
             for suffix in ("", "_desc"):
                 key = f"preset_{pid}{suffix}"
-                if not translations.tr(lng, key) or translations.tr(lng, key) == key:
+                if not translations.TR[key][lng] or translations.TR[key][lng] == key:
                     _fail(f"preset {pid} missing {lng} translation '{key}'")
     print(f"preset coverage OK: {len(presets.PRESET_ORDER)} presets fully wired")
 
@@ -136,22 +136,21 @@ def main():
         for lng in ("EN", "ZH", "JA"):
             for suffix in ("", "_desc"):
                 key = f"ref_{rid}{suffix}"
-                if not translations.tr(lng, key) or translations.tr(lng, key) == key:
+                if not translations.TR[key][lng] or translations.TR[key][lng] == key:
                     _fail(f"reference {rid} missing {lng} translation '{key}'")
     if not hasattr(bpy.ops.rolllux, "reference_step"):
         _fail("reference_step operator not registered")
     print(f"reference coverage OK: {len(presets.REFERENCE_ORDER)} references fully wired")
 
-    # Language detect + trilingual.
-    print("detect_language ->", translations.detect_language())
+    # Translation dictionary coverage.
     for lang in ("EN", "ZH", "JA"):
-        settings.language = lang
-        if translations.tr(lang, "preset_portrait") != {"EN": "Portrait", "ZH": "\u4eba\u50cf", "JA": "\u30dd\u30fc\u30c8\u30ec\u30fc\u30c8"}[lang]:
-            _fail(f"label {lang}")
-    settings.language = "ZH"
-    print("trilingual OK")
+        if translations.TR["preset_portrait"][lang] != {
+            "EN": "Portrait", "ZH": "\u4eba\u50cf", "JA": "\u30dd\u30fc\u30c8\u30ec\u30fc\u30c8",
+        }[lang]:
+            _fail(f"preset_portrait label {lang}")
+    print("translation dict OK")
 
-    # Enum tooltips: no English property-level prefix; item text is translated.
+    # Enum tooltips: property-level description empty; item text from tr().
     from rolllux.properties import RLLM_Settings
     if RLLM_Settings.bl_rna.properties["mode"].description:
         _fail("mode property description should be empty for i18n tooltips")
@@ -159,44 +158,9 @@ def main():
         desc for ident, _name, desc in translations.mode_items(settings, bpy.context)
         if ident == "PORTRAIT"
     )
-    if portrait_desc != translations.tr("ZH", "mode_portrait_desc"):
-        _fail(f"mode item desc ZH: {portrait_desc!r}")
-    translations.sync_i18n("ZH")
-    height_tip = RLLM_Settings.bl_rna.properties["rig_height"].description
-    if not any("\u4e00" <= c <= "\u9fff" for c in height_tip):
-        _fail(f"rig_height tooltip not ZH: {height_tip!r}")
-    world_tip = RLLM_Settings.bl_rna.properties["use_world"].description
-    if not any("\u4e00" <= c <= "\u9fff" for c in world_tip):
-        _fail(f"use_world tooltip not ZH: {world_tip!r}")
-    print("tooltip i18n OK")
-
-    # Clipboard paste (best-effort; needs a real OS clipboard).
-    import subprocess as _sub
-    from rolllux import clipboard as _clip
-    if not hasattr(bpy.ops.rolllux, "paste_image"):
-        _fail("paste operator not registered")
-    grabbed = None
-    if sys.platform.startswith("win"):
-        setps = (
-            "Add-Type -AssemblyName System.Windows.Forms;"
-            "Add-Type -AssemblyName System.Drawing;"
-            "$b=New-Object System.Drawing.Bitmap 8,8;"
-            "$g=[System.Drawing.Graphics]::FromImage($b);"
-            "$g.Clear([System.Drawing.Color]::FromArgb(200,100,50));"
-            "[System.Windows.Forms.Clipboard]::SetImage($b)"
-        )
-        try:
-            _sub.run(["powershell", "-Sta", "-NoProfile", "-Command", setps],
-                     capture_output=True, timeout=20)
-            grabbed = _clip.grab_clipboard_image()
-        except Exception:
-            grabbed = None
-    if grabbed:
-        ci = bpy.data.images.load(grabbed, check_existing=False)
-        print(f"clipboard paste OK: {ci.size[0]}x{ci.size[1]}")
-        bpy.data.images.remove(ci)
-    else:
-        print("clipboard paste SKIP (no clipboard image / non-windows)")
+    if portrait_desc != translations.TR["mode_portrait_desc"]["EN"]:
+        _fail(f"mode item desc EN: {portrait_desc!r}")
+    print("enum i18n OK")
 
     # Origin-offset robustness: geometry sits at x=5 but origin is at world 0.
     bpy.ops.mesh.primitive_cube_add(location=(5.0, 0.0, 0.0))
