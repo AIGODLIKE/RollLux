@@ -316,6 +316,130 @@ In camera view without **Subject Frame**, the plugin can also crop to the **came
 
 ---
 
+## 🤖 MCP — AI lighting (Cursor & Codex)
+
+Drive RollLux from chat: *「给 Suzanne 打 portrait 光」*, *Light the Cube with golden hour*, or *Apply Arcane-style lighting*.
+
+> **Full release only** — install `rolllux-*.zip` from [GitHub Releases](https://github.com/AIGODLIKE/RollLux/releases). The Extension Platform build (*-marketplace.zip*) does not include the MCP bridge.
+
+```
+Cursor / Codex  ──stdio──►  rolllux_mcp  ──TCP :9886──►  Blender (RollLux panel ▶ Start MCP)
+```
+
+### Setup
+
+1. **Blender** — enable RollLux → **N** panel → **▶ Start MCP** (port **9886**).
+2. **Python** — `cd rolllux/mcp && py -m pip install -e .`
+3. **AI client** — configure once (below).
+
+Detailed guide: **[mcp/README.md](mcp/README.md)**
+
+### Cursor
+
+Create or edit `.cursor/mcp.json` in your workspace root:
+
+```json
+{
+  "mcpServers": {
+    "rolllux": {
+      "command": "cmd",
+      "args": ["/c", "py", "-m", "rolllux_mcp"],
+      "cwd": "rolllux/mcp",
+      "env": {
+        "PYTHONPATH": "rolllux/mcp",
+        "BLENDER_HOST": "localhost",
+        "BLENDER_PORT": "9886"
+      }
+    }
+  }
+}
+```
+
+If you cloned only the `rolllux` repo, copy [`.cursor/mcp.json.example`](.cursor/mcp.json.example) and set `cwd` to the absolute path of `rolllux/mcp`.  
+Then **Cursor Settings → MCP** → enable **rolllux** and restart Cursor.
+
+### OpenAI Codex
+
+Add to `~/.codex/config.toml` (or trust the project and use `rolllux/.codex/config.toml`):
+
+```toml
+[mcp_servers.rolllux]
+command = "py"
+args = ["-m", "rolllux_mcp"]
+cwd = "C:/path/to/your/clone/rolllux/mcp"
+enabled = true
+tool_timeout_sec = 180
+
+[mcp_servers.rolllux.env]
+PYTHONPATH = "."
+BLENDER_HOST = "localhost"
+BLENDER_PORT = "9886"
+```
+
+Or: `codex mcp add rolllux -- py -m rolllux_mcp` (then set `cwd` and env).  
+In a Codex session, run **`/mcp`** to confirm tools are listed.  
+Template: [`.codex/config.toml.example`](.codex/config.toml.example)
+
+### Example prompts
+
+<details>
+<summary><b>Example 1 — Portrait (Cursor)</b></summary>
+
+**You:** Check Blender, list meshes, then light **Suzanne** with **portrait** and 4 lights.
+
+**Agent calls:**
+
+```
+check_blender()
+list_scene_objects(limit=20)
+light_object(object_name="Suzanne", preset="portrait", light_count=4, auto_exposure=true)
+```
+
+</details>
+
+<details>
+<summary><b>Example 2 — Reference preset (Codex)</b></summary>
+
+**You:** Clear RollLux and relight my selection using reference **golden_hour**.
+
+**Agent calls:**
+
+```
+clear_rolllux_lighting()
+light_selection(reference_preset="golden_hour", preset="cinematic")
+```
+
+</details>
+
+<details>
+<summary><b>Example 3 — Stylized look (any client)</b></summary>
+
+Select the target mesh in Blender, then:
+
+**You:** Apply **Arcane** teal + amber lighting on the active object.
+
+**Agent calls:**
+
+```
+list_scene_objects()
+light_arcane(intensity=0.22, light_count=4)
+```
+
+Style tools (`light_jinx`, `light_doraemon`, `light_cyberpunk`, …) use the **active object**; use `light_object(name=…)` when you need a specific mesh by name.
+
+</details>
+
+| Tool | Purpose |
+|------|---------|
+| `check_blender` | Connection + RollLux installed |
+| `list_scene_objects` | Scene mesh names |
+| `light_object` | Light a **named** object |
+| `light_selection` | Light **active** selection |
+| `clear_rolllux_lighting` | Remove rig |
+| `light_arcane`, `light_jinx`, … | Stylized looks (active object) |
+
+---
+
 ## 🗺️ Roadmap
 
 - [ ] Viewport comparison overlay (reference vs render)

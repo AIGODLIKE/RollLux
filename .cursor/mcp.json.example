@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "rolllux": {
+      "command": "cmd",
+      "args": ["/c", "py", "-m", "rolllux_mcp"],
+      "cwd": "ROLLUX_MCP_CWD",
+      "env": {
+        "PYTHONPATH": ".",
+        "BLENDER_HOST": "localhost",
+        "BLENDER_PORT": "9886"
+      }
+    }
+  }
+}

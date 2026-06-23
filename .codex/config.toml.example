@@ -1,0 +1,19 @@
+# RollLux MCP — OpenAI Codex example
+#
+# Option A: copy this block into ~/.codex/config.toml
+# Option B: copy this file to rolllux/.codex/config.toml (requires trusting the project in Codex)
+#
+# Replace ROLLUX_MCP_CWD with the absolute path to your clone's rolllux/mcp folder.
+
+[mcp_servers.rolllux]
+command = "py"
+args = ["-m", "rolllux_mcp"]
+cwd = "ROLLUX_MCP_CWD"
+enabled = true
+startup_timeout_sec = 15
+tool_timeout_sec = 180
+
+[mcp_servers.rolllux.env]
+PYTHONPATH = "."
+BLENDER_HOST = "localhost"
+BLENDER_PORT = "9886"
