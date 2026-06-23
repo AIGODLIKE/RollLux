@@ -1,14 +1,7 @@
-"""Generate RollLux's shipped PNG assets with zero external dependencies.
+"""Runtime procedural PNG helpers for RollLux random presets and references.
 
-Produces:
-  icons/preset_<id>.png      - shaded-sphere thumbnails for the lighting presets
-  references/ref_<id>.png     - a small library of reference lighting images
-
-Run with any Python that has numpy (Blender ships it; or `py -m pip install
-numpy`):  ``py rolllux/gen_assets.py``
-
-PNGs are written with a tiny built-in encoder (zlib + struct) so we never need
-Pillow or imageio.
+Pure numpy + a tiny built-in PNG encoder (zlib + struct). Used at runtime by
+``presets.randomize_preset`` and ``presets.randomize_reference``.
 """
 
 from __future__ import annotations
@@ -466,6 +459,7 @@ REFERENCE_PRESETS = {
 }
 
 
+# MARKETPLACE_STRIP_BEGIN dev_main
 def main():
     os.makedirs(ICON_DIR, exist_ok=True)
     os.makedirs(REF_DIR, exist_ok=True)
@@ -483,3 +477,4 @@ def main():
     print("\nAssets written to:")
     print(" ", ICON_DIR)
     print(" ", REF_DIR)
+# MARKETPLACE_STRIP_END dev_main

@@ -84,7 +84,7 @@ def main():
     settings.reference_user_cleared = True
     settings.reference_preset = presets.DEFAULT_REFERENCE
     lighting.clear_previous(bpy.context)
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
     if settings.reference_image is None:
         _fail("generate with no image should auto-load random reference")
     if settings.reference_preset != "random":
@@ -193,12 +193,12 @@ def main():
     settings.light_count = 5
     settings.lighting_preset = "cinematic"
     if not lighting.has_rig():
-        bpy.ops.rolllux.generate()
+        bpy.ops.wm.rolllux_generate()
     if len(lighting.list_lights()) != 5:
         _fail(f"light_count=5 produced {len(lighting.list_lights())} lights")
     print("light_count=5 OK")
     settings.light_count = 2
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
     if len(lighting.list_lights()) != 2:
         _fail(f"light_count=2 produced {len(lighting.list_lights())} lights")
     print("light_count=2 OK")
@@ -222,7 +222,7 @@ def main():
     settings.reference_image = mimg
     settings.lighting_preset = "auto"
     settings.light_count = 6
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
     mcols = {tuple(round(c, 2) for c in lt.rolllux_light.base_color)
              for lt in lighting.list_lights()}
     print(f"multicolor sampling: {len(lighting.list_lights())} lights, "
@@ -235,7 +235,7 @@ def main():
     print("multicolor sampling OK")
 
     settings.light_count = 3
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
     active = bpy.context.view_layer.objects.active
     if active is None or active.name != monkey_name:
         _fail(f"active object not preserved: {active.name if active else None}")
@@ -297,7 +297,7 @@ def main():
     settings.intensity = 9.99
     locked_intensity = settings.intensity
     before = settings.lighting_preset
-    bpy.ops.rolllux.preset_step(direction=1)
+    bpy.ops.wm.rolllux_preset_step(direction=1)
     if settings.lighting_preset == before:
         _fail("preset_step did not change preset")
     if abs(settings.intensity - locked_intensity) > 0.01:
@@ -308,23 +308,23 @@ def main():
 
     # Random generation: lighting preset + reference image.
     settings.live = True
-    bpy.ops.rolllux.random_preset()
+    bpy.ops.wm.rolllux_random_preset()
     if settings.lighting_preset != "random":
         _fail("random_preset did not select the random slot")
     if "random" not in presets.PRESET_PARAMS:
         _fail("random preset params missing")
-    bpy.ops.rolllux.random_preset()  # twice: must not error / must re-roll
+    bpy.ops.wm.rolllux_random_preset()  # twice: must not error / must re-roll
     print("random preset OK")
 
     ref_before = settings.reference_image
-    bpy.ops.rolllux.random_reference()
+    bpy.ops.wm.rolllux_random_reference()
     if settings.reference_image is None or settings.reference_image == ref_before:
         _fail("random_reference did not set a new image")
     if settings.reference_preset != "random":
         _fail("random_reference did not select the random slot")
     if not scene.rolllux_result.valid:
         _fail("random_reference did not analyze")
-    bpy.ops.rolllux.random_reference()  # twice: fresh image each roll
+    bpy.ops.wm.rolllux_random_reference()  # twice: fresh image each roll
     print("random reference OK:", settings.reference_image.name,
           settings.reference_image.size[:])
     settings.light_count = 3
@@ -340,7 +340,7 @@ def main():
 
     # Delete a light (add-light feature removed).
     victim = lighting.list_lights()[-1]
-    bpy.ops.rolllux.delete_light(name=victim.name)
+    bpy.ops.wm.rolllux_delete_light(name=victim.name)
     if len(lighting.list_lights()) != n_before - 1:
         _fail("delete_light did not remove")
     if "RLLX_OT_add_light" in dir(bpy.types):
@@ -359,7 +359,7 @@ def main():
         _fail("backplate property still present")
     bg1 = next((n for n in scene.world.node_tree.nodes if n.type == "BACKGROUND"), None)
     world_after = tuple(bg1.inputs[0].default_value) if bg1 else None
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
     if lighting.has_rig():
         _fail("clear left lights")
     bg2 = next((n for n in scene.world.node_tree.nodes if n.type == "BACKGROUND"), None) if scene.world else None

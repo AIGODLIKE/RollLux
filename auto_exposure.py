@@ -680,16 +680,8 @@ def restore_handlers() -> None:
         _ensure_idle_timer()
 
 
-def _deferred_restore():
-    try:
-        restore_handlers()
-    except Exception:
-        pass
-    return None
-
-
 def register():
-    bpy.app.timers.register(_deferred_restore, first_interval=0.0)
+    pass
 
 
 def unregister():

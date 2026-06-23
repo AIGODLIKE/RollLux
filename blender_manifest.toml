@@ -1,10 +1,10 @@
 schema_version = "1.0.0"
 
 id = "rolllux"
-version = "5.5.3"
+version = "5.5.5"
 name = "RollLux"
 tagline = "Perceptive Full-Auto Metering Lighting"
-maintainer = "ACGGIT"
+maintainer = "ACGGIT <https://github.com/AIGODLIKE/RollLux>"
 type = "add-on"
 
 tags = ["Lighting", "Render"]

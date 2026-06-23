@@ -95,7 +95,7 @@ bpy.context.view_layer.objects.active = obj
 s = scene.rolllux
 if PARAMS["clear_existing"]:
     try:
-        bpy.ops.rolllux.clear()
+        bpy.ops.wm.rolllux_clear()
     except Exception:
         pass
 
@@ -122,7 +122,7 @@ s.auto_exposure = bool(PARAMS["auto_exposure"])
 s.target_mode = "SELECTED"
 
 try:
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
 except Exception as exc:
     fail(str(exc))
 
@@ -196,7 +196,7 @@ if obj.name not in bpy.context.scene.objects:
 s = bpy.context.scene.rolllux
 if PARAMS["clear_existing"]:
     try:
-        bpy.ops.rolllux.clear()
+        bpy.ops.wm.rolllux_clear()
     except Exception:
         pass
 
@@ -212,7 +212,7 @@ s.intensity = float(PARAMS["intensity"])
 s.use_luxpro = bool(PARAMS["use_luxpro"])
 s.auto_exposure = bool(PARAMS["auto_exposure"])
 s.target_mode = "SELECTED"
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 lights = []
 coll = bpy.data.collections.get("RollLux")
@@ -301,10 +301,10 @@ if obj is None:
     bpy.context.view_layer.objects.active = obj
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 coll = bpy.data.collections.get("RollLux")
 key_obj = fill_obj = None
@@ -463,11 +463,11 @@ obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 BACK_RIM_DIRS = [
     (-0.82, 0.30, -0.82),
@@ -677,7 +677,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -689,7 +689,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 SIDE_RIM_DIRS = [
     (-0.88, 0.02, -0.42),
@@ -922,7 +922,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -934,7 +934,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 SIDE_RIM_DIRS = [
     (-0.84, 0.04, -0.40),
@@ -1186,7 +1186,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -1198,7 +1198,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [tuple(item.color) for item in result.sampled_colors]
@@ -1472,7 +1472,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -1484,7 +1484,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [
@@ -1774,7 +1774,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -1786,7 +1786,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [
@@ -2047,7 +2047,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -2059,7 +2059,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [
@@ -2362,7 +2362,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -2374,7 +2374,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [
@@ -2665,7 +2665,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -2677,7 +2677,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [tuple(item.color) for item in result.sampled_colors]
@@ -2951,7 +2951,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -2963,7 +2963,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [tuple(item.color) for item in result.sampled_colors]
@@ -3227,7 +3227,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -3239,7 +3239,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [analysis_mod.apply_color_strategy(c, "VIVID") for c in REF_COLORS[:s.light_count]]
@@ -3541,7 +3541,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -3553,7 +3553,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [analysis_mod.apply_color_strategy(c, "VIVID") for c in REF_COLORS[:s.light_count]]
@@ -3827,7 +3827,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -3839,7 +3839,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [tuple(item.color) for item in result.sampled_colors]
@@ -4109,7 +4109,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -4121,7 +4121,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [analysis_mod.apply_color_strategy(c, "VIVID") for c in REF_COLORS[:s.light_count]]
@@ -4417,7 +4417,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -4429,7 +4429,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [analysis_mod.apply_color_strategy(c, "VIVID") for c in REF_COLORS[:s.light_count]]
@@ -4714,7 +4714,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -4726,7 +4726,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [analysis_mod.apply_color_strategy(c, "VIVID") for c in REF_FALLBACK[:s.light_count]]
@@ -4973,7 +4973,7 @@ bpy.context.view_layer.objects.active = obj
 obj_name = obj.name
 
 try:
-    bpy.ops.rolllux.clear()
+    bpy.ops.wm.rolllux_clear()
 except Exception:
     pass
 
@@ -4985,7 +4985,7 @@ for o in bpy.context.scene.objects:
 obj.select_set(True)
 bpy.context.view_layer.objects.active = obj
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 
 result = bpy.context.scene.rolllux_result
 palette = [tuple(item.color) for item in result.sampled_colors]
@@ -5222,11 +5222,11 @@ if obj is None:
 
 if PARAMS["clear_existing"]:
     try:
-        bpy.ops.rolllux.clear()
+        bpy.ops.wm.rolllux_clear()
     except Exception:
         pass
 
-bpy.ops.rolllux.generate()
+bpy.ops.wm.rolllux_generate()
 result = bpy.context.scene.rolllux_result
 lights = []
 coll = bpy.data.collections.get("RollLux")
@@ -5265,8 +5265,8 @@ before = {{
     "reference_image": s.reference_image.name if s.reference_image else None,
 }}
 
-bpy.ops.rolllux.random_preset()
-bpy.ops.rolllux.random_reference()
+bpy.ops.wm.rolllux_random_preset()
+bpy.ops.wm.rolllux_random_reference()
 
 out = {{
     "ok": True,
@@ -5288,7 +5288,7 @@ if not hasattr(bpy.types.Scene, "rolllux"):
 else:
     removed = 0
     try:
-        bpy.ops.rolllux.clear()
+        bpy.ops.wm.rolllux_clear()
         removed = 1
     except Exception as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))

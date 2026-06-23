@@ -46,9 +46,14 @@ class RollLuxMCPServer:
 
     def stop(self):
         self.running = False
-        if self.sock:
+        sock = self.sock
+        if sock is not None:
             try:
-                self.sock.close()
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            try:
+                sock.close()
             except OSError:
                 pass
             self.sock = None
@@ -57,24 +62,38 @@ class RollLuxMCPServer:
             self.thread = None
 
     def _serve(self):
+        sock = None
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((self.host, self.port))
-            self.sock.listen(1)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock = sock
+            sock.bind((self.host, self.port))
+            sock.listen(1)
             print(f"RollLux MCP Bridge listening on {self.host}:{self.port}")
             while self.running:
-                self.sock.settimeout(1.0)
+                sock.settimeout(1.0)
                 try:
-                    client, _addr = self.sock.accept()
+                    client, _addr = sock.accept()
                 except socket.timeout:
                     continue
+                except OSError:
+                    if not self.running:
+                        break
+                    raise
                 threading.Thread(target=self._handle, args=(client,), daemon=True).start()
-        except Exception as exc:
-            print(f"RollLux MCP Bridge server error: {exc}")
-            traceback.print_exc()
+        except OSError as exc:
+            if self.running:
+                print(f"RollLux MCP Bridge server error: {exc}")
+                traceback.print_exc()
         finally:
             self.running = False
+            if sock is not None:
+                try:
+                    sock.close()
+                except OSError:
+                    pass
+            if self.sock is sock:
+                self.sock = None
 
     def _handle(self, client):
         client.settimeout(None)

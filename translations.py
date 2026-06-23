@@ -1,16 +1,11 @@
-"""In-add-on UI strings for English / 中文 / 日本語.
-
-A lightweight, self-contained i18n layer driven by the add-on's own ``language``
-setting (independent of Blender's UI language). Labels are looked up live in
-``draw()`` and via dynamic EnumProperty item callbacks, so switching language
-updates the panel immediately.
-"""
+"""UI strings for English / 中文 / 日本語 via ``bpy.app.translations``."""
 
 from __future__ import annotations
 
 # key -> {EN, ZH, JA}
 TR = {
     # generic / header
+    # MARKETPLACE_STRIP_BEGIN i18n_dev
     "language": {"EN": "Language", "ZH": "\u8bed\u8a00", "JA": "\u8a00\u8a9e"},
     "mcp_connect": {"EN": "Connect MCP", "ZH": "\u8fde\u63a5 MCP", "JA": "MCP \u63a5\u7d9a"},
     "mcp_disconnect": {"EN": "Disconnect MCP", "ZH": "\u65ad\u5f00 MCP", "JA": "MCP \u5207\u65ad"},
@@ -84,6 +79,7 @@ TR = {
         "ZH": "\u52a0\u8f7d RollLux \u65f6\u81ea\u52a8\u542f\u52a8 MCP \u6865\u63a5",
         "JA": "RollLux \u8aad\u307f\u8fbc\u307f\u6642\u306b MCP \u30d6\u30ea\u30c3\u30b8\u3092\u81ea\u52d5\u958b\u59cb",
     },
+    # MARKETPLACE_STRIP_END i18n_dev
     "img_size": {"EN": "{w} x {h} px", "ZH": "{w} x {h} \u50cf\u7d20", "JA": "{w} x {h} px"},
     "no_image": {"EN": "No reference image",
                  "ZH": "\u672a\u9009\u62e9\u53c2\u8003\u56fe",
@@ -364,6 +360,7 @@ TR = {
     "msg_loaded": {"EN": "Loaded reference: {name}",
                    "ZH": "\u5df2\u8f7d\u5165\u53c2\u8003\u56fe: {name}",
                    "JA": "\u53c2\u7167\u753b\u50cf\u3092\u8aad\u307f\u8fbc\u307f: {name}"},
+    # MARKETPLACE_STRIP_BEGIN clipboard
     "btn_paste": {"EN": "Paste from Clipboard",
                   "ZH": "\u4ece\u526a\u8d34\u677f\u7c98\u8d34",
                   "JA": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u304b\u3089\u8cbc\u308a\u4ed8\u3051"},
@@ -373,6 +370,7 @@ TR = {
     "err_no_clip": {"EN": "No image found on the clipboard",
                     "ZH": "\u526a\u8d34\u677f\u4e2d\u6ca1\u6709\u56fe\u50cf",
                     "JA": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u306b\u753b\u50cf\u304c\u3042\u308a\u307e\u305b\u3093"},
+    # MARKETPLACE_STRIP_END clipboard
     "msg_analyzed": {"EN": "Analyzed ({mood}, contrast {c})",
                      "ZH": "\u5206\u6790\u5b8c\u6210 ({mood}, \u5bf9\u6bd4 {c})",
                      "JA": "\u89e3\u6790\u5b8c\u4e86 ({mood}, \u30b3\u30f3\u30c8\u30e9\u30b9\u30c8 {c})"},
@@ -489,10 +487,12 @@ TR = {
         "JA": "\u660e\u308b\u3044\u4e2d\u6027\u8272\u306e\u5e95\u306b\u4f4e\u5f69\u5ea6\u306e\u67d4\u3089\u304b\u306a\u8272\u5757",
     },
 
-    # property tooltips (synced to RNA when language changes)
+    # property tooltips (English msgids for bpy.app.translations)
+    # MARKETPLACE_STRIP_BEGIN desc_language
     "desc_language": {"EN": "UI language for this add-on",
                       "ZH": "\u672c\u63d2\u4ef6\u7684\u754c\u9762\u8bed\u8a00",
                       "JA": "\u3053\u306e\u30a2\u30c9\u30aa\u30f3\u306eUI\u8a00\u8a9e"},
+    # MARKETPLACE_STRIP_END desc_language
     "desc_reference": {"EN": "Lighting reference image to match",
                        "ZH": "\u7528\u4e8e\u5339\u914d\u7684\u706f\u5149\u53c2\u8003\u56fe",
                        "JA": "\u7167\u660e\u3092\u5408\u308f\u305b\u308b\u53c2\u7167\u753b\u50cf"},
@@ -997,8 +997,10 @@ _PROP_DESC = {
     "lock_tone_highlights": "desc_lock_tone_highlights",
     "lock_contrast_boost": "desc_lock_contrast_boost",
     "lock_light_colors": "desc_lock_light_colors",
+    # MARKETPLACE_STRIP_BEGIN prop_desc_mcp
     "mcp_port": "desc_mcp_port",
     "mcp_auto_connect": "desc_mcp_auto_connect",
+    # MARKETPLACE_STRIP_END prop_desc_mcp
 }
 
 # RNA property name= (English) -> TR label key (icon-only controls).
@@ -1010,21 +1012,23 @@ _PROP_NAME = {
 _OPERATOR_CLASSES: list = []
 
 _OPERATOR_LABELS = {
-    "rolllux.open_image": "op_open_image",
-    "rolllux.analyze": "analyze",
-    "rolllux.generate": "generate",
-    "rolllux.clear": "clear",
-    "rolllux.preset_step": "op_preset_step",
-    "rolllux.random_preset": "op_random_preset",
-    "rolllux.random_reference": "op_random_reference",
-    "rolllux.auto_timer": "op_auto_timer",
-    "rolllux.reference_step": "op_reference_step",
-    "rolllux.set_rendered": "set_rendered",
-    "rolllux.bake_ae": "ae_apply_exposure",
-    "rolllux.delete_light": "op_delete_light",
+    "wm.rolllux_open_image": "op_open_image",
+    "wm.rolllux_analyze": "analyze",
+    "wm.rolllux_generate": "generate",
+    "wm.rolllux_clear": "clear",
+    "wm.rolllux_preset_step": "op_preset_step",
+    "wm.rolllux_random_preset": "op_random_preset",
+    "wm.rolllux_random_reference": "op_random_reference",
+    "wm.rolllux_auto_timer": "op_auto_timer",
+    "wm.rolllux_reference_step": "op_reference_step",
+    "wm.rolllux_set_rendered": "set_rendered",
+    "wm.rolllux_bake_ae": "ae_apply_exposure",
+    "wm.rolllux_delete_light": "op_delete_light",
+    # MARKETPLACE_STRIP_BEGIN op_labels_mcp
     "rolllux_mcp.toggle": "mcp_start",
     "rolllux_mcp.connect": "mcp_connect",
     "rolllux_mcp.disconnect": "mcp_disconnect",
+    # MARKETPLACE_STRIP_END op_labels_mcp
 }
 
 

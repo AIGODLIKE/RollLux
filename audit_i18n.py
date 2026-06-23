@@ -95,7 +95,7 @@ def main() -> int:
         "preset_step", "random_preset", "auto_timer", "reference_step",
         "random_reference", "set_rendered", "bake_ae", "delete_light",
     ):
-        bl_id = f"rolllux.{cls_name}"
+        bl_id = f"wm.rolllux_{cls_name}"
         if bl_id not in _OPERATOR_LABELS:
             issues.append(f"operator missing i18n map: {bl_id}")
 

@@ -106,7 +106,7 @@ def _draw_ae_advanced(col, settings):
             text=tr("ae_light_ev", ev=f"{settings.ae_value:.2f}"),
             icon="LIGHT",
         )
-    row.operator("rolllux.bake_ae", text="", icon="FILE_TICK")
+    row.operator("wm.rolllux_bake_ae", text="", icon="FILE_TICK")
 
 
 def _draw_icon_picker(parent, settings, prop, step_id, random_op, label_key):
@@ -125,18 +125,18 @@ def _draw_icon_picker(parent, settings, prop, step_id, random_op, label_key):
 
 def _draw_reference(col, settings):
     _section_head(col, "section_reference", "IMAGE_DATA")
-    col.template_ID(settings, "reference_image", open="rolllux.open_image")
+    col.template_ID(settings, "reference_image", open="wm.rolllux_open_image")
 
 
 def _draw_presets(col, settings):
     _draw_icon_picker(
         col, settings, "lighting_preset",
-        "rolllux.preset_step", "rolllux.random_preset", "preset_section",
+        "wm.rolllux_preset_step", "wm.rolllux_random_preset", "preset_section",
     )
     _sep(col, 0.05)
     _draw_icon_picker(
         col, settings, "reference_preset",
-        "rolllux.reference_step", "rolllux.random_reference", "ref_section",
+        "wm.rolllux_reference_step", "wm.rolllux_random_reference", "ref_section",
     )
     col.prop(settings, "distribution_color_mode", text=tr("distribution_color_mode"))
 
@@ -149,7 +149,7 @@ def _draw_ae_toggle(col, settings):
     )
     if settings.auto_exposure:
         row.prop(settings, "ae_ev_bias", text=tr("ae_ev_short"))
-        row.operator("rolllux.bake_ae", text="", icon="FILE_TICK")
+        row.operator("wm.rolllux_bake_ae", text="", icon="FILE_TICK")
     else:
         row.label(text=tr("auto_exposure"))
 
@@ -157,12 +157,12 @@ def _draw_ae_toggle(col, settings):
 def _draw_actions_pro(col, settings):
     _section_head(col, "section_actions", "PLAY")
     row = col.row(align=True)
-    row.operator("rolllux.generate", icon="LIGHT", text=tr("generate"))
+    row.operator("wm.rolllux_generate", icon="LIGHT", text=tr("generate"))
     row = col.row(align=True)
-    row.operator("rolllux.analyze", icon="VIEWZOOM", text=tr("analyze"))
-    row.operator("rolllux.clear", icon="TRASH", text=tr("clear"))
+    row.operator("wm.rolllux_analyze", icon="VIEWZOOM", text=tr("analyze"))
+    row.operator("wm.rolllux_clear", icon="TRASH", text=tr("clear"))
     row.operator(
-        "rolllux.auto_timer", text="",
+        "wm.rolllux_auto_timer", text="",
         icon="TEMP", depress=settings.auto_timer,
     )
     row.prop(settings, "timer_interval", text="")
@@ -172,11 +172,11 @@ def _draw_actions_quick(col, settings):
     _section_head(col, "section_actions", "PLAY")
     row = col.row(align=True)
     row.scale_y = 1.2
-    row.operator("rolllux.generate", icon="LIGHT", text=tr("generate"))
+    row.operator("wm.rolllux_generate", icon="LIGHT", text=tr("generate"))
     row = col.row(align=True)
-    row.operator("rolllux.clear", icon="TRASH", text=tr("clear"))
+    row.operator("wm.rolllux_clear", icon="TRASH", text=tr("clear"))
     row.operator(
-        "rolllux.auto_timer", text="",
+        "wm.rolllux_auto_timer", text="",
         icon="TEMP", depress=settings.auto_timer,
     )
     row.prop(settings, "timer_interval", text="")
@@ -268,7 +268,7 @@ def _draw_lights(layout, settings):
         top = col.row(align=True)
         top.prop(info, "enabled", text="")
         top.label(text=role)
-        top.operator("rolllux.delete_light", text="", icon="X").name = obj.name
+        top.operator("wm.rolllux_delete_light", text="", icon="X").name = obj.name
         bottom = col.row(align=True)
         bottom.prop(info, "base_color", text="")
         bottom.prop(info, "gain", text=tr("light_energy"))
@@ -337,8 +337,12 @@ class RLLX_PT_main(Panel):
     bl_region_type = "UI"
     bl_category = "RollLux"
 
+    # MARKETPLACE_STRIP_BEGIN ui_mcp
     def draw_header_preset(self, context):
-        from . import mcp_bridge
+        try:
+            from . import mcp_bridge
+        except ImportError:
+            return
 
         settings = context.scene.rolllux
         row = self.layout.row(align=True)
@@ -357,9 +361,11 @@ class RLLX_PT_main(Panel):
                 icon="PLAY",
             )
         row.menu("RLLX_MT_mcp", text="", icon="PREFERENCES")
+    # MARKETPLACE_STRIP_END ui_mcp
 
     def draw(self, context):
         from . import properties as _props
+        _props.ensure_runtime_hooks()
         _props.schedule_default_reference(context.scene, context)
 
         layout = self.layout

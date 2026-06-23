@@ -1,5 +1,5 @@
-"""Scene + object settings, presets wiring, live-update callbacks, language
-sync, and a read-only store for the last analysis."""
+"""Scene + object settings, presets wiring, live-update callbacks, and a
+read-only store for the last analysis."""
 
 import os
 
@@ -322,6 +322,7 @@ class RLLM_Settings(PropertyGroup):
         items=translations.ui_mode_items,
         default=0,
     )
+    # MARKETPLACE_STRIP_BEGIN mcp
     mcp_port: IntProperty(
         name="MCP Port", default=9886, min=1024, max=65535,
         description=_d("mcp_port"),
@@ -333,6 +334,7 @@ class RLLM_Settings(PropertyGroup):
     mcp_connected: BoolProperty(
         name="MCP Connected", default=False, options={"HIDDEN"},
     )
+    # MARKETPLACE_STRIP_END mcp
     reference_user_cleared: BoolProperty(default=False, options={"HIDDEN"})
     reference_is_custom: BoolProperty(default=False, options={"HIDDEN"})
 
@@ -580,6 +582,7 @@ def needs_default_reference(scene) -> bool:
 
 def schedule_default_reference(scene=None, context=None):
     """Queue ``ensure_default_reference`` outside UI draw (RNA writes forbidden there)."""
+    ensure_runtime_hooks()
     scenes = [scene] if scene is not None else _iter_scenes()
     pending = [sc for sc in scenes if needs_default_reference(sc)]
     new = [sc for sc in pending if sc.name not in _DEFAULT_SCHEDULED]
@@ -608,6 +611,7 @@ def schedule_default_reference(scene=None, context=None):
 
 def ensure_default_reference(scene=None, context=None):
     """Load the default ``broad_light`` reference when none is set."""
+    ensure_runtime_hooks()
     global _REFERENCE_BUSY
     scenes = [scene] if scene is not None else _iter_scenes()
     ctx = context or getattr(bpy.context, "scene", None) and bpy.context or None
@@ -656,6 +660,19 @@ def _on_load(_dummy):
 
 _classes = (RLLM_LightInfo, RLLM_SampledColor, RLLM_AnalysisResult, RLLM_Settings)
 
+_RUNTIME_HOOKS = False
+
+
+def ensure_runtime_hooks() -> None:
+    """Register load_post and deferred init once the user opens RollLux."""
+    global _RUNTIME_HOOKS
+    if _RUNTIME_HOOKS:
+        return
+    _RUNTIME_HOOKS = True
+    if _on_load not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(_on_load)
+    bpy.app.timers.register(_deferred_init, first_interval=0.0)
+
 
 def register():
     for cls in _classes:
@@ -663,16 +680,15 @@ def register():
     bpy.types.Scene.rolllux = PointerProperty(type=RLLM_Settings)
     bpy.types.Scene.rolllux_result = PointerProperty(type=RLLM_AnalysisResult)
     bpy.types.Object.rolllux_light = PointerProperty(type=RLLM_LightInfo)
-    if _on_load not in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.append(_on_load)
-    bpy.app.timers.register(_deferred_init, first_interval=0.0)
     auto_exposure.register()
 
 
 def unregister():
+    global _RUNTIME_HOOKS
     auto_exposure.unregister()
     if _on_load in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_on_load)
+    _RUNTIME_HOOKS = False
     del bpy.types.Object.rolllux_light
     del bpy.types.Scene.rolllux_result
     del bpy.types.Scene.rolllux

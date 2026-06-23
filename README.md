@@ -75,6 +75,7 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 | 🖼️ **Distribution library** | Built-in reference images **procedurally synthesized** (gradients, blobs, rim, vignette…) |
 | 💡 **1–8 lights** | Hue-diverse k-means palette matched to light count |
 | 🔧 **Per-light edit** | Toggle, recolor, energy, softness, delete |
+| 🔒 **Lock light colors** | Keep palette when re-generating or stepping presets |
 | 🪟 **Floating overlay** | Pin reference in viewport (opacity, scale, corner) |
 | 📂 **Open image** | Load a reference image from disk |
 | 🌐 **Localized UI** | English / 中文 / 日本語 via Blender language preferences |
@@ -138,17 +139,20 @@ Drop in a reference, hit **Generate**, and refine with real-time sliders. Works 
 
 ### Install
 
-1. Download **`rolllux-5.5.3.zip`** from [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest).
+1. Download **`rolllux-5.5.5.zip`** from [Releases](https://github.com/AIGODLIKE/RollLux/releases/latest).
 2. Blender → **Edit → Preferences → Get Extensions → ▼ → Install from Disk…**
 3. Select the zip → enable **RollLux**.
+
+See [CHANGELOG.md](CHANGELOG.md) for changes since 5.0.
 
 <details>
 <summary><b>🛠️ Build from source</b></summary>
 
 ```bash
 cd rolllux
-py gen_assets.py    # optional: regenerate thumbnails & reference PNGs
-py build.py         # -> ../dist/rolllux-<version>.zip
+py dev/gen_assets_main.py   # optional: regenerate thumbnails & reference PNGs
+py build.py                 # -> ../dist/rolllux-<version>.zip
+py build_marketplace.py     # -> ../dist/rolllux-<version>-marketplace.zip (Extension Platform)
 ```
 
 </details>

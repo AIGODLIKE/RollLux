@@ -1,0 +1,30 @@
+schema_version = "1.0.0"
+
+id = "rolllux"
+version = "5.5.5"
+name = "RollLux"
+tagline = "Perceptive Full-Auto Metering Lighting"
+maintainer = "ACGGIT <https://github.com/AIGODLIKE/RollLux>"
+type = "add-on"
+
+tags = ["Lighting", "Render"]
+
+blender_version_min = "5.0.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+  "SPDX:CC0-1.0",
+]
+
+website = "https://github.com/AIGODLIKE/RollLux"
+support = "https://github.com/AIGODLIKE/RollLux/issues"
+
+copyright = [
+  "2024-2026 ACGGIT",
+  "Bundled icons/ and references/ PNGs: ACGGIT, CC0 1.0",
+]
+
+[permissions]
+files = "Load reference lighting images from disk via the file picker"
+
+# Pure-python, zero external dependencies. Uses bpy + the numpy bundled with Blender.

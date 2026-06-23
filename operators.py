@@ -43,7 +43,7 @@ def _schedule_enum_step(context, prop_id: str, order: tuple[str, ...], direction
 
 class RLLX_OT_open_image(Operator, ImportHelper):
     """Load a lighting reference image from disk"""
-    bl_idname = "rolllux.open_image"
+    bl_idname = "wm.rolllux_open_image"
     bl_label = "Open Reference Image"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -69,7 +69,7 @@ class RLLX_OT_open_image(Operator, ImportHelper):
 
 class RLLX_OT_analyze(Operator):
     """Analyze the reference image without creating lights"""
-    bl_idname = "rolllux.analyze"
+    bl_idname = "wm.rolllux_analyze"
     bl_label = "Analyze Reference"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -96,7 +96,7 @@ class RLLX_OT_analyze(Operator):
 
 class RLLX_OT_generate(Operator):
     """Analyze the reference and build a matching light rig"""
-    bl_idname = "rolllux.generate"
+    bl_idname = "wm.rolllux_generate"
     bl_label = "Generate Lighting"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -122,7 +122,7 @@ class RLLX_OT_generate(Operator):
 
 class RLLX_OT_clear(Operator):
     """Remove the generated light rig and restore the environment"""
-    bl_idname = "rolllux.clear"
+    bl_idname = "wm.rolllux_clear"
     bl_label = "Clear Lighting"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -135,7 +135,7 @@ class RLLX_OT_clear(Operator):
 
 class RLLX_OT_preset_step(Operator):
     """Switch to the previous / next lighting preset"""
-    bl_idname = "rolllux.preset_step"
+    bl_idname = "wm.rolllux_preset_step"
     bl_label = "Step Preset"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -150,7 +150,7 @@ class RLLX_OT_preset_step(Operator):
 
 class RLLX_OT_random_preset(Operator):
     """Generate a random lighting preset"""
-    bl_idname = "rolllux.random_preset"
+    bl_idname = "wm.rolllux_random_preset"
     bl_label = "Random Lighting Preset"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -174,7 +174,7 @@ class RLLX_OT_random_preset(Operator):
 
 class RLLX_OT_random_reference(Operator):
     """Generate a random reference image"""
-    bl_idname = "rolllux.random_reference"
+    bl_idname = "wm.rolllux_random_reference"
     bl_label = "Random Reference Image"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -192,8 +192,9 @@ class RLLX_OT_random_reference(Operator):
 
 class RLLX_OT_auto_timer(Operator):
     """Toggle a timer that re-generates the lighting on an interval"""
-    bl_idname = "rolllux.auto_timer"
+    bl_idname = "wm.rolllux_auto_timer"
     bl_label = "Auto Generate Timer"
+    bl_options = {"REGISTER", "UNDO"}
 
     _timer = None
 
@@ -235,7 +236,7 @@ class RLLX_OT_auto_timer(Operator):
 
 class RLLX_OT_reference_step(Operator):
     """Switch to the previous / next reference library image"""
-    bl_idname = "rolllux.reference_step"
+    bl_idname = "wm.rolllux_reference_step"
     bl_label = "Step Reference"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -251,7 +252,7 @@ class RLLX_OT_reference_step(Operator):
 
 class RLLX_OT_set_rendered(Operator):
     """Switch the 3D View to Rendered shading (required for Auto Exposure)"""
-    bl_idname = "rolllux.set_rendered"
+    bl_idname = "wm.rolllux_set_rendered"
     bl_label = "Set Rendered Shading"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -266,7 +267,7 @@ class RLLX_OT_set_rendered(Operator):
 
 class RLLX_OT_bake_ae(Operator):
     """Apply current auto exposure to render settings or light intensity, then disable AE"""
-    bl_idname = "rolllux.bake_ae"
+    bl_idname = "wm.rolllux_bake_ae"
     bl_label = "Apply Exposure"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -286,7 +287,7 @@ class RLLX_OT_bake_ae(Operator):
 
 class RLLX_OT_delete_light(Operator):
     """Delete a light from the rig"""
-    bl_idname = "rolllux.delete_light"
+    bl_idname = "wm.rolllux_delete_light"
     bl_label = "Delete Light"
     bl_options = {"REGISTER", "UNDO"}
 

@@ -26,7 +26,7 @@ def main() -> None:
     s.target_mode = "SELECTED"
     s.lighting_preset = "auto"
     s.light_count = 3
-    bpy.ops.rolllux.generate()
+    bpy.ops.wm.rolllux_generate()
     print(f"RollLux: generated lighting for {obj.name}")
 
 
